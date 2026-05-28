@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha Multiplayer</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; }
+        .tabuleiro { display: inline-grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; margin-top: 20px; }
+        .casa { width: 100px; height: 100px; background-color: #333; border: 2px solid #555; font-size: 2.5rem; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .casa:hover { background-color: #444; }
+        #status { margin-top: 20px; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Velha Online</h1>
+    <div id="status">Aguardando outro jogador...</div>
+    <div class="tabuleiro">
+        <div class="casa" data-index="0"></div>
+        <div class="casa" data-index="1"></div>
+        <div class="casa" data-index="2"></div>
+        <div class="casa" data-index="3"></div>
+        <div class="casa" data-index="4"></div>
+        <div class="casa" data-index="5"></div>
+        <div class="casa" data-index="6"></div>
+        <div class="casa" data-index="7"></div>
+        <div class="casa" data-index="8"></div>
+    </div>
+</body>
+</html>
