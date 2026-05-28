@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Velha Multiplayer</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; margin-top: 50px; }
         .tabuleiro { display: inline-grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; margin-top: 20px; }
         .casa { width: 100px; height: 100px; background-color: #333; border: 2px solid #555; font-size: 2.5rem; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .casa:hover { background-color: #444; }
-        #status { margin-top: 20px; font-size: 1.2rem; }
+        #status { margin-top: 20px; font-size: 1.2rem; color: #00ffcc; }
     </style>
 </head>
 <body>
+
     <h1>Jogo da Velha Online</h1>
-    <div id="status">Aguardando outro jogador...</div>
-    <div class="tabuleiro">
+    <div id="status">Conectando ao servidor...</div>
+
+    <div class="tabuleiro" id="tabuleiro">
         <div class="casa" data-index="0"></div>
         <div class="casa" data-index="1"></div>
         <div class="casa" data-index="2"></div>
@@ -26,5 +28,71 @@
         <div class="casa" data-index="7"></div>
         <div class="casa" data-index="8"></div>
     </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        // Conectando a um servidor gratuito de testes (PieSocket)
+        // Criamos uma sala única baseada no dia de hoje para você e seu amigo se acharem
+        const socket = io("https://pie-socket.glitch.me"); 
+        const sala = "sala-jogo-da-velha-secreta";
+        
+        let meuSimbolo = ""; 
+        let meuTurno = false;
+        const casas = document.querySelectorAll('.casa');
+        const statusText = document.getElementById('status');
+
+        socket.on('connect', () => {
+            statusText.innerText = "Conectado! Entrando na sala...";
+            socket.emit('join-room', sala);
+        });
+
+        // O servidor avisa quem é o Jogador X (o primeiro a entrar) e quem é o O
+        socket.on('player-assignment', (simbolo) => {
+            meuSimbolo = simbolo;
+            if (meuSimbolo === "X") {
+                statusText.innerText = "Você é o 'X'. Aguardando seu amigo entrar...";
+                meuTurno = true;
+            } else {
+                statusText.innerText = "Você é o 'O'. Seu amigo (X) joga primeiro.";
+                meuTurno = false;
+            }
+        });
+
+        socket.on('start-game', () => {
+            if (meuTurno) {
+                statusText.innerText = "Seu amigo entrou! É a sua vez (X).";
+            } else {
+                statusText.innerText = "Seu amigo entrou! Vez dele (X).";
+            }
+        });
+
+        // Quando o jogador clica em uma casa
+        casas.forEach(casa => {
+            casa.addEventListener('click', () => {
+                if (!meuTurno || casa.innerText !== "") return;
+
+                const index = casa.getAttribute('data-index');
+                casa.innerText = meuSimbolo;
+                meuTurno = false;
+                statusText.innerText = "Aguardando a jogada do seu amigo...";
+
+                // Avisa o servidor sobre a jogada
+                socket.emit('make-move', { sala: sala, index: index, simbolo: meuSimbolo });
+            });
+        });
+
+        // Ouvindo a jogada que o seu amigo fez
+        socket.on('move-made', (dados) => {
+            if (dados.simbolo !== meuSimbolo) {
+                casas[dados.index].innerText = dados.simbolo;
+                meuTurno = true;
+                statusText.innerText = `Seu amigo jogou! Sua vez (${meuSimbolo}).`;
+            }
+        });
+
+        socket.on('player-disconnected', () => {
+            statusText.innerText = "O outro jogador saiu. Atualize a página para recomeçar.";
+        });
+    </script>
 </body>
 </html>
