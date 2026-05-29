@@ -3,19 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Velha Multiplayer</title>
+    <title>Jogo da Velha Multiplayer por Salas</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; margin-top: 50px; }
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; margin-top: 30px; }
         .tabuleiro { display: inline-grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; margin-top: 20px; }
         .casa { width: 100px; height: 100px; background-color: #333; border: 2px solid #555; font-size: 2.5rem; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .casa:hover { background-color: #444; }
         #status { margin-top: 20px; font-size: 1.2rem; color: #00ffcc; }
+        .controle-sala { margin-bottom: 20px; }
+        input, button { padding: 8px; font-size: 1rem; border-radius: 5px; border: none; margin: 5px; }
+        button { background-color: #00ffcc; color: #222; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #00ccaa; }
     </style>
 </head>
 <body>
 
-    <h1>Jogo da Velha Online</h1>
-    <div id="status">Conectando ao nosso servidor...</div>
+    <h1>Jogo da Velha Online 🕹️</h1>
+
+    <div class="controle-sala" id="container-sala">
+        <input type="text" id="input-sala" placeholder="Digite o nome da sala (ex: sala1)" value="sala1">
+        <button id="btn-conectar">Entrar na Sala</button>
+    </div>
+
+    <div id="status">Digite um nome de sala e clique em Entrar para jogar.</div>
 
     <div class="tabuleiro" id="tabuleiro">
         <div class="casa" data-index="0"></div>
@@ -31,57 +41,91 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // ATENÇÃO: Depois que criarmos o servidor no Render, 
-        // vamos substituir esse link abaixo pelo link do SEU servidor!
-        const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com";
+        // SEU SERVIDOR DO RENDER
+        const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
         
-        const socket = io(URL_SERVIDOR); 
+        let socket;
+        let minhaSala = "";
         let meuSimbolo = ""; 
         let meuTurno = false;
+        
         const casas = document.querySelectorAll('.casa');
         const statusText = document.getElementById('status');
+        const btnConectar = document.getElementById('btn-conectar');
+        const inputSala = document.getElementById('input-sala');
+        const containerSala = document.getElementById('container-sala');
 
-        socket.on('connect', () => {
-            statusText.innerText = "Conectado! Aguardando oponente...";
-        });
-
-        socket.on('player-assignment', (simbolo) => {
-            meuSimbolo = simbolo;
-            if (meuSimbolo === "X") {
-                statusText.innerText = "Você é o 'X'. Aguardando amigo entrar...";
-                meuTurno = true;
-            } else {
-                statusText.innerText = "Você é o 'O'. Seu amigo joga primeiro.";
-                meuTurno = false;
+        btnConectar.addEventListener('click', () => {
+            minhaSala = inputSala.value.trim();
+            if (!minhaSala) {
+                alert("Por favor, digite um nome para a sala!");
+                return;
             }
-        });
 
-        socket.on('start-game', () => {
-            statusText.innerText = meuTurno ? "O jogo começou! Sua vez (X)." : "O jogo começou! Vez do amigo (X).";
-        });
+            statusText.innerText = "Conectando ao servidor...";
+            containerSala.style.display = "none"; // Esconde os botões de sala
 
-        casas.forEach(casa => {
-            casa.addEventListener('click', () => {
-                if (!meuTurno || casa.innerText !== "") return;
-                const index = casa.getAttribute('data-index');
-                casa.innerText = meuSimbolo;
-                meuTurno = false;
-                statusText.innerText = "Aguardando o amigo...";
-                socket.emit('make-move', { index: index, simbolo: meuSimbolo });
+            // Inicia a conexão com o servidor
+            socket = io(URL_SERVIDOR); 
+
+            socket.on('connect', () => {
+                statusText.innerText = `Entrando na sala: ${minhaSala}...`;
+                socket.emit('entrar-na-sala', minhaSala);
+            });
+
+            socket.on('player-assignment', (simbolo) => {
+                meuSimbolo = simbolo;
+                if (meuSimbolo === "X") {
+                    statusText.innerText = `Você é o 'X'. Aguardando oponente na sala [${minhaSala}]...`;
+                    meuTurno = true;
+                } else {
+                    statusText.innerText = `Você é o 'O'. Seu oponente joga primeiro na sala [${minhaSala}].`;
+                    meuTurno = false;
+                }
+            });
+
+            socket.on('start-game', () => {
+                statusText.innerText = meuTurno ? "O jogo começou! Sua vez (X)." : "O jogo começou! Vez do oponente (X).";
+            });
+
+            socket.on('move-made', (dados) => {
+                if (dados.simbolo !== meuSimbolo) {
+                    casas[dados.index].innerText = dados.simbolo;
+                    meuTurno = true;
+                    statusText.innerText = `Seu oponente jogou! Sua vez (${meuSimbolo}).`;
+                }
+            });
+
+            socket.on('status', (mensagem) => {
+                if (mensagem === 'Sala cheia') {
+                    statusText.innerText = "Esta sala já está cheia! Atualize a página e tente outro nome.";
+                }
+            });
+
+            socket.on('player-disconnected', () => {
+                statusText.innerText = "O outro jogador saiu da sala. Atualize a página para jogar novamente.";
+                limparTabuleiro();
             });
         });
 
-        socket.on('move-made', (dados) => {
-            if (dados.simbolo !== meuSimbolo) {
-                casas[dados.index].innerText = dados.simbolo;
-                meuTurno = true;
-                statusText.innerText = `Seu amigo jogou! Sua vez (${meuSimbolo}).`;
-            }
+        // Lógica de clique nas casas do tabuleiro
+        casas.forEach(casa => {
+            casa.addEventListener('click', () => {
+                if (!socket || !meuTurno || casa.innerText !== "") return;
+                
+                const index = casa.getAttribute('data-index');
+                casa.innerText = meuSimbolo;
+                meuTurno = false;
+                statusText.innerText = "Aguardando o oponente...";
+                
+                // Envia a jogada informando qual a sala atual
+                socket.emit('make-move', { sala: minhaSala, index: index, simbolo: meuSimbolo });
+            });
         });
 
-        socket.on('player-disconnected', () => {
-            statusText.innerText = "O outro jogador saiu. Reinicie a página.";
-        });
+        function limparTabuleiro() {
+            casas.forEach(casa => casa.innerText = "");
+        }
     </script>
 </body>
 </html>
