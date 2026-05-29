@@ -6,86 +6,83 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+    cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// Aqui vamos guardar as salas ativas. 
-// Estrutura: { "nomeDaSala": [ { id: "socketId", simbolo: "X" } ] }
 const salas = {};
 
-io.on('connection', (socket) => {
-    console.log(`Usuário conectado: ${socket.id}`);
+// Função auxiliar para enviar a lista de salas atualizada para todo mundo
+function enviarListaSalas() {
+    const lista = Object.keys(salas).map(nome => ({
+        nome: nome,
+        jogadores: salas[nome].length
+    }));
+    io.emit('lista-salas', lista);
+}
 
-    // O jogador pede para entrar em uma sala
+io.on('connection', (socket) => {
+    console.log(`Conectado: ${socket.id}`);
+    
+    // Envia as salas existentes assim que alguém abre o site
+    enviarListaSalas();
+
     socket.on('entrar-na-sala', (nomeSala) => {
-        // Se a sala não existe, cria uma vazia
         if (!salas[nomeSala]) {
             salas[nomeSala] = [];
         }
 
         const jogadoresNaSala = salas[nomeSala];
 
-        // Se a sala já tiver 2 jogadores, impede a entrada
         if (jogadoresNaSala.length >= 2) {
-            socket.emit('status', 'Sala cheia');
-            socket.disconnect();
+            socket.emit('status-erro', 'Esta sala já está cheia!');
             return;
         }
 
-        // Define o símbolo com base em quem já está na sala
-        // Se não tem ninguém, é X. Se já tem 1, é O.
         const simbolo = jogadoresNaSala.length === 0 ? "X" : "O";
+        jogadoresNaSala.push({ id: socket.id, simbolo: simbolo, pronto: false });
         
-        // Guarda as informações do jogador
-        jogadoresNaSala.push({ id: socket.id, simbolo: simbolo, sala: nomeSala });
-        
-        // Faz o socket do navegador entrar oficialmente na "sala" do Socket.io
         socket.join(nomeSala);
-        
-        // Avisa o jogador qual o símbolo dele
         socket.emit('player-assignment', simbolo);
 
-        // Se completou 2 jogadores, avisa a sala que o jogo começou
         if (jogadoresNaSala.length === 2) {
             io.to(nomeSala).emit('start-game');
         }
+
+        enviarListaSalas();
     });
 
-    // Escuta os movimentos e repassa APENAS para a sala correta
     socket.on('make-move', (dados) => {
-        // Envia para todos na sala, exceto para quem enviou
         socket.to(dados.sala).emit('move-made', dados);
     });
 
-    // Gerencia a desconexão limpando a sala corretamente
+    socket.on('reiniciar-rodada', (dados) => {
+        socket.to(dados.sala).emit('rodada-reiniciada');
+    });
+
+    // Quando o jogador clica em "Sair da Sala" ou fecha o navegador
+    socket.on('sair-da-sala', (nomeSala) => {
+        sair(socket, nomeSala);
+    });
+
     socket.on('disconnect', () => {
-        console.log(`Usuário desconectado: ${socket.id}`);
-        
-        // Procura em qual sala esse usuário estava
         for (const nomeSala in salas) {
-            const index = salas[nomeSala].findIndex(j => j.id === socket.id);
-            
-            if (index !== -1) {
-                // Remove o jogador da lista daquela sala
-                salas[nomeSala].splice(index, 1);
-                
-                // Avisa o jogador restante que o oponente saiu
-                io.to(nomeSala).emit('player-disconnected');
-                
-                // Se a sala ficou totalmente vazia, deleta ela para não gastar memória
-                if (salas[nomeSala].length === 0) {
-                    delete salas[nomeSala];
-                }
-                break;
-            }
+            sair(socket, nomeSala);
         }
     });
 });
 
+function sair(socket, nomeSala) {
+    if (salas[nomeSala]) {
+        salas[nomeSala] = salas[nomeSala].filter(j => j.id !== socket.id);
+        socket.leave(nomeSala);
+        io.to(nomeSala).emit('player-disconnected');
+        
+        if (salas[nomeSala].length === 0) {
+            delete salas[nomeSala];
+        }
+        enviarListaSalas();
+    }
+}
+
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Servidor rodando perfeitamente na porta ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

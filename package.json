@@ -1,7 +1,7 @@
 {
   "name": "servidor-jogo-da-velha",
   "version": "1.0.0",
-  "description": "Servidor multiplayer para jogo da velha",
+  "description": "Servidor multiplayer para jogo da velha com salas",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

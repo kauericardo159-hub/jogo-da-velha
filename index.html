@@ -3,129 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Velha Multiplayer por Salas</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #222; color: white; margin-top: 30px; }
-        .tabuleiro { display: inline-grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 5px; margin-top: 20px; }
-        .casa { width: 100px; height: 100px; background-color: #333; border: 2px solid #555; font-size: 2.5rem; font-weight: bold; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .casa:hover { background-color: #444; }
-        #status { margin-top: 20px; font-size: 1.2rem; color: #00ffcc; }
-        .controle-sala { margin-bottom: 20px; }
-        input, button { padding: 8px; font-size: 1rem; border-radius: 5px; border: none; margin: 5px; }
-        button { background-color: #00ffcc; color: #222; font-weight: bold; cursor: pointer; }
-        button:hover { background-color: #00ccaa; }
-    </style>
+    <title>Arcade Velha Multiplayer</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>Jogo da Velha Online 🕹️</h1>
+    <h1>Neon Tic-Tac-Toe 🕹️</h1>
 
-    <div class="controle-sala" id="container-sala">
-        <input type="text" id="input-sala" placeholder="Digite o nome da sala (ex: sala1)" value="sala1">
-        <button id="btn-conectar">Entrar na Sala</button>
+    <div class="container-lobby" id="tela-lobby">
+        <h3>Criar uma Sala</h3>
+        <input type="text" id="input-sala" placeholder="Nome da sala...">
+        <button id="btn-criar">Criar e Entrar</button>
+
+        <h3>Salas Disponíveis</h3>
+        <div class="lista-salas" id="lista-salas-container">
+            <div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa no momento.</div>
+        </div>
     </div>
 
-    <div id="status">Digite um nome de sala e clique em Entrar para jogar.</div>
+    <div id="area-jogo">
+        <div class="placar">
+            <div class="player" id="p1-display">Player 1 (X): <span id="score-x">0</span></div>
+            <div class="player" id="p2-display">Player 2 (O): <span id="score-o">0</span></div>
+        </div>
 
-    <div class="tabuleiro" id="tabuleiro">
-        <div class="casa" data-index="0"></div>
-        <div class="casa" data-index="1"></div>
-        <div class="casa" data-index="2"></div>
-        <div class="casa" data-index="3"></div>
-        <div class="casa" data-index="4"></div>
-        <div class="casa" data-index="5"></div>
-        <div class="casa" data-index="6"></div>
-        <div class="casa" data-index="7"></div>
-        <div class="casa" data-index="8"></div>
+        <div id="status">Conectando...</div>
+
+        <div class="tabuleiro" id="tabuleiro">
+            <div class="casa" data-index="0"></div>
+            <div class="casa" data-index="1"></div>
+            <div class="casa" data-index="2"></div>
+            <div class="casa" data-index="3"></div>
+            <div class="casa" data-index="4"></div>
+            <div class="casa" data-index="5"></div>
+            <div class="casa" data-index="6"></div>
+            <div class="casa" data-index="7"></div>
+            <div class="casa" data-index="8"></div>
+        </div>
+        <br>
+        <button class="btn-sair" id="btn-sair">Sair da Sala</button>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // SEU SERVIDOR DO RENDER
         const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
-        
-        let socket;
+        const socket = io(URL_SERVIDOR);
+
         let minhaSala = "";
         let meuSimbolo = ""; 
         let meuTurno = false;
-        
+        let vitoriasX = 0;
+        let vitoriasO = 0;
+        let tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
+
         const casas = document.querySelectorAll('.casa');
         const statusText = document.getElementById('status');
-        const btnConectar = document.getElementById('btn-conectar');
-        const inputSala = document.getElementById('input-sala');
-        const containerSala = document.getElementById('container-sala');
+        const lobby = document.getElementById('tela-lobby');
+        const jogoArea = document.getElementById('area-jogo');
 
-        btnConectar.addEventListener('click', () => {
-            minhaSala = inputSala.value.trim();
-            if (!minhaSala) {
-                alert("Por favor, digite um nome para a sala!");
+        // Recebe e desenha as salas ativas na tela inicial
+        socket.on('lista-salas', (salas) => {
+            const container = document.getElementById('lista-salas-container');
+            container.innerHTML = "";
+            if (salas.length === 0) {
+                container.innerHTML = '<div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa. Crie uma!</div>';
                 return;
             }
-
-            statusText.innerText = "Conectando ao servidor...";
-            containerSala.style.display = "none"; // Esconde os botões de sala
-
-            // Inicia a conexão com o servidor
-            socket = io(URL_SERVIDOR); 
-
-            socket.on('connect', () => {
-                statusText.innerText = `Entrando na sala: ${minhaSala}...`;
-                socket.emit('entrar-na-sala', minhaSala);
-            });
-
-            socket.on('player-assignment', (simbolo) => {
-                meuSimbolo = simbolo;
-                if (meuSimbolo === "X") {
-                    statusText.innerText = `Você é o 'X'. Aguardando oponente na sala [${minhaSala}]...`;
-                    meuTurno = true;
-                } else {
-                    statusText.innerText = `Você é o 'O'. Seu oponente joga primeiro na sala [${minhaSala}].`;
-                    meuTurno = false;
+            salas.forEach(sala => {
+                if (sala.jogadores < 2) {
+                    const item = document.createElement('div');
+                    item.className = 'item-sala';
+                    item.innerHTML = `<span><b>${sala.nome}</b> (${sala.jogadores}/2)</span>
+                                      <button onclick="entrarNaSala('${sala.nome}')">Entrar</button>`;
+                    container.appendChild(item);
                 }
-            });
-
-            socket.on('start-game', () => {
-                statusText.innerText = meuTurno ? "O jogo começou! Sua vez (X)." : "O jogo começou! Vez do oponente (X).";
-            });
-
-            socket.on('move-made', (dados) => {
-                if (dados.simbolo !== meuSimbolo) {
-                    casas[dados.index].innerText = dados.simbolo;
-                    meuTurno = true;
-                    statusText.innerText = `Seu oponente jogou! Sua vez (${meuSimbolo}).`;
-                }
-            });
-
-            socket.on('status', (mensagem) => {
-                if (mensagem === 'Sala cheia') {
-                    statusText.innerText = "Esta sala já está cheia! Atualize a página e tente outro nome.";
-                }
-            });
-
-            socket.on('player-disconnected', () => {
-                statusText.innerText = "O outro jogador saiu da sala. Atualize a página para jogar novamente.";
-                limparTabuleiro();
             });
         });
 
-        // Lógica de clique nas casas do tabuleiro
+        document.getElementById('btn-criar').addEventListener('click', () => {
+            const nome = document.getElementById('input-sala').value.trim();
+            if (nome) entrarNaSala(nome);
+        });
+
+        function entrarNaSala(nome) {
+            minhaSala = nome;
+            lobby.style.display = "none";
+            jogoArea.style.display = "block";
+            statusText.innerText = "Entrando na sala...";
+            socket.emit('entrar-na-sala', minhaSala);
+        }
+
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            socket.emit('sair-da-sala', minhaSala);
+            location.reload(); // Recarrega a página para voltar ao lobby limpo
+        });
+
+        socket.on('player-assignment', (simbolo) => {
+            meuSimbolo = simbolo;
+            if (simbolo === "X") {
+                statusText.innerText = "Você é o Player 1 (X). Aguardando oponente...";
+                document.getElementById('p1-display').classList.add('ativo');
+                meuTurno = true;
+            } else {
+                statusText.innerText = "Você é o Player 2 (O). Aguardando início...";
+                document.getElementById('p2-display').classList.add('ativo');
+                meuTurno = false;
+            }
+        });
+
+        socket.on('start-game', () => {
+            resgatarVez();
+        });
+
         casas.forEach(casa => {
             casa.addEventListener('click', () => {
-                if (!socket || !meuTurno || casa.innerText !== "") return;
-                
-                const index = casa.getAttribute('data-index');
-                casa.innerText = meuSimbolo;
-                meuTurno = false;
-                statusText.innerText = "Aguardando o oponente...";
-                
-                // Envia a jogada informando qual a sala atual
-                socket.emit('make-move', { sala: minhaSala, index: index, simbolo: meuSimbolo });
+                const idx = casa.getAttribute('data-index');
+                if (!meuTurno || tabuleiroEstado[idx] !== "") return;
+
+                fazerJogadaLocal(idx, meuSimbolo);
+                socket.emit('make-move', { sala: minhaSala, index: idx, simbolo: meuSimbolo });
             });
         });
 
-        function limparTabuleiro() {
-            casas.forEach(casa => casa.innerText = "");
+        socket.on('move-made', (dados) => {
+            fazerJogadaLocal(dados.index, dados.simbolo);
+        });
+
+        function fazerJogadaLocal(index, simbolo) {
+            tabuleiroEstado[index] = simbolo;
+            casas[index].innerText = simbolo;
+            meuTurno = (simbolo !== meuSimbolo);
+            
+            if (!checarResultado()) {
+                resgatarVez();
+            }
         }
+
+        function resgatarVez() {
+            statusText.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
+            document.getElementById('p1-display').classList.toggle('ativo', meuTurno && meuSimbolo === "X" || !meuTurno && meuSimbolo === "O");
+            document.getElementById('p2-display').classList.toggle('ativo', meuTurno && meuSimbolo === "O" || !meuTurno && meuSimbolo === "X");
+        }
+
+        function checarResultado() {
+            const caminhosVitoria = [
+                [0,1,2], [3,4,5], [6,7,8], // Linhas
+                [0,3,6], [1,4,7], [2,5,8], // Colunas
+                [0,4,8], [2,4,6]           // Diagonais
+            ];
+
+            for (const caminho of caminhosVitoria) {
+                const [a, b, c] = caminho;
+                if (tabuleiroEstado[a] && tabuleiroEstado[a] === tabuleiroEstado[b] && tabuleiroEstado[a] === tabuleiroEstado[c]) {
+                    finalizarRodada(tabuleiroEstado[a], caminho);
+                    return true;
+                }
+            }
+
+            if (!tabuleiroEstado.includes("")) {
+                finalizarRodada("Empate");
+                return true;
+            }
+            return false;
+        }
+
+        function finalizarRodada(vencedor, caminhoGanhador = null) {
+            meuTurno = false;
+            
+            if (vencedor === "Empate") {
+                statusText.innerText = "A rodada empatou! Reiniciando em 3 segundos...";
+            } else {
+                if (caminhoGanhador) {
+                    caminhoGanhador.forEach(i => casas[i].setAttribute('data-venceu', 'true'));
+                }
+                if (vencedor === "X") vitoriasX++;
+                if (vencedor === "O") vitoriasO++;
+
+                document.getElementById('score-x').innerText = vitoriasX;
+                document.getElementById('score-o').innerText = vitoriasO;
+
+                statusText.innerText = vencedor === meuSimbolo ? "Você venceu esta rodada!" : "Oponente venceu esta rodada!";
+            }
+
+            // Verifica se a partida inteira (3 rounds) acabou
+            setTimeout(() => {
+                if (vitoriasX === 3 || vitoriasO === 3) {
+                    const campeao = vitoriasX === 3 ? "Player 1 (X)" : "Player 2 (O)";
+                    alert(`🏆 FIM DE JOGO! O grande campeão foi o ${campeao}!`);
+                    location.reload();
+                } else {
+                    proximaRodada();
+                }
+            }, 3000);
+        }
+
+        function proximaRodada() {
+            tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
+            casas.forEach(casa => {
+                casa.innerText = "";
+                casa.removeAttribute('data-venceu');
+            });
+            // O jogador O começa o próximo round equilibrando a partida
+            meuTurno = (meuSimbolo === "O" && (vitoriasX + vitoriasO) % 2 !== 0) || (meuSimbolo === "X" && (vitoriasX + vitoriasO) % 2 === 0);
+            resgatarVez();
+        }
+
+        socket.on('player-disconnected', () => {
+            statusText.innerText = "Oponente desconectou. Você venceu por W.O!";
+            setTimeout(() => location.reload(), 4000);
+        });
     </script>
 </body>
 </html>

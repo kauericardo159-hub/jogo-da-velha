@@ -1,0 +1,142 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background-color: #121214;
+    color: #e1e1e6;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+/* Painel de Salas */
+.container-lobby {
+    max-width: 400px;
+    margin: 30px auto;
+    background: #202024;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+input {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #29292e;
+    background: #121214;
+    color: white;
+    width: 70%;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: none;
+    background-color: #00ffcc;
+    color: #121214;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background-color: #00ccaa;
+    box-shadow: 0 0 8px #00ffcc;
+}
+
+.btn-sair {
+    background-color: #ff3366;
+    color: white;
+    margin-top: 15px;
+}
+.btn-sair:hover {
+    background-color: #cc2252;
+    box-shadow: 0 0 8px #ff3366;
+}
+
+/* Lista de salas */
+.lista-salas {
+    margin-top: 15px;
+    text-align: left;
+    background: #121214;
+    padding: 10px;
+    border-radius: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.item-sala {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #29292e;
+}
+.item-sala button {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+}
+
+/* Área do Jogo */
+#area-jogo {
+    display: none;
+}
+
+.placar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 20px auto;
+    font-size: 1.2rem;
+    background: #202024;
+    max-width: 400px;
+    padding: 10px;
+    border-radius: 8px;
+}
+.player {
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+.player.ativo {
+    border: 2px solid #00ffcc;
+    background: rgba(0, 255, 204, 0.1);
+}
+
+#status {
+    margin: 15px;
+    font-size: 1.1rem;
+    color: #ffcc00;
+}
+
+/* Tabuleiro */
+.tabuleiro {
+    display: inline-grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
+}
+.casa {
+    width: 100px;
+    height: 100px;
+    background-color: #29292e;
+    border-radius: 8px;
+    font-size: 2.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+.casa:hover {
+    background-color: #323238;
+}
+.casa[data-venceu="true"] {
+    background-color: #00ffcc !important;
+    color: #121214;
+}
