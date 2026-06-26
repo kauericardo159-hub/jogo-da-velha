@@ -3,295 +3,265 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Velha Multiplayer - Pro</title>
-    <style>
-        /* Estilos Integrados Avançados com Tema Neon Cyberpunk */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0c0c12;
-            color: #e1e1e6;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            user-select: none;
-        }
-
-        h1 {
-            color: #00f0ff;
-            text-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
-            margin-bottom: 20px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* Badge do Perfil Logado no Topo */
-        .global-user-header {
-            display: flex;
-            align-items: center;
-            background: #14141d;
-            border: 1px solid #8257e5;
-            box-shadow: 0 0 12px rgba(130, 87, 229, 0.2);
-            padding: 8px 16px;
-            border-radius: 30px;
-            margin-bottom: 25px;
-        }
-        .global-user-img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #8257e5;
-            margin-right: 12px;
-        }
-        .global-user-name {
-            font-weight: bold;
-            color: #fff;
-            font-size: 0.95rem;
-        }
-
-        /* Containers Principais */
-        .container-lobby, #area-jogo {
-            background-color: #14141d;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 2rem;
-            width: 360px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-        }
-
-        #area-jogo { display: none; }
-
-        h3 {
-            margin-top: 0;
-            font-size: 1.1rem;
-            color: #00f0ff;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 8px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #0c0c12;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff;
-            border-radius: 6px;
-            box-sizing: border-box;
-            margin-bottom: 12px;
-        }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #00f0ff;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        #btn-criar {
-            background-color: #00f0ff;
-            color: #0c0c12;
-            box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2);
-        }
-        #btn-criar:hover { background-color: #61f7ff; }
-
-        .lista-salas {
-            margin-top: 15px;
-            max-height: 180px;
-            overflow-y: auto;
-        }
-
-        /* Slot da Sala com Foto do Dono */
-        .item-sala {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-        .sala-info-bloco {
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-        .sala-dono-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #00f0ff;
-            object-fit: cover;
-            margin-right: 10px;
-            background: #0c0c12;
-        }
-        .sala-detalhes {
-            display: flex;
-            flex-direction: column;
-            font-size: 0.85rem;
-        }
-        .item-sala button {
-            width: auto;
-            padding: 6px 12px;
-            background-color: #8257e5;
-            color: white;
-            font-size: 0.8rem;
-        }
-
-        /* Placar Dinâmico Com Avatares dentro da Sala */
-        .placar {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .player {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.85rem;
-            opacity: 0.6;
-            transition: all 0.2s;
-        }
-        .player.ativo {
-            opacity: 1;
-            border-color: #00f0ff;
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-            background: rgba(0, 240, 255, 0.02);
-        }
-        .placar-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.2);
-            margin-bottom: 6px;
-            background: #0c0c12;
-        }
-        .player.ativo .placar-avatar {
-            border-color: #00f0ff;
-        }
-        .score-num {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #04d361;
-            margin-top: 4px;
-        }
-
-        #status {
-            text-align: center;
-            font-weight: 600;
-            color: #a8a8b3;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-        }
-
-        /* Tabuleiro */
-        .tabuleiro {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            background-color: rgba(255,255,255,0.03);
-            padding: 8px;
-            border-radius: 8px;
-        }
-        .casa {
-            height: 100px;
-            background-color: #0c0c12;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-        .casa:hover { background-color: #181824; }
-        .casa[data-venceu="true"] { color: #04d361; background-color: rgba(4, 211, 97, 0.1); }
-
-        .btn-sair {
-            background: transparent;
-            color: #ff4b4b;
-            border: 1px solid rgba(255, 75, 75, 0.3);
-        }
-        .btn-sair:hover { background: rgba(255, 75, 75, 0.1); }
-    </style>
+    <title>Cyber Arcade Hub - Pro Evolution</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="global-user-header">
-        <img id="headerAvatar" class="global-user-img" src="" alt="Avatar">
-        <span id="headerNome" class="global-user-name">Carregando...</span>
-    </div>
-
-    <h1>Neon Tic-Tac-Toe 🕹️</h1>
-
-    <div class="container-lobby" id="tela-lobby">
-        <h3>Criar uma Sala</h3>
-        <input type="text" id="input-sala" placeholder="Nome da sala...">
-        <button id="btn-criar">Criar e Entrar</button>
-
-        <h3 style="margin-top: 25px;">Salas Disponíveis</h3>
-        <div class="lista-salas" id="lista-salas-container">
-            <div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa no momento.</div>
+    <header class="global-user-header">
+        <div class="header-left">
+            <span class="brand-logo">NIGHT·ARCADE 🕹️</span>
         </div>
-    </div>
-
-    <div id="area-jogo">
-        <div class="placar">
-            <div class="player" id="p1-display">
-                <img id="p1-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P1">
-                <span id="p1-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">Aguardando...</span>
-                <span class="score-num" id="score-x">0</span>
-            </div>
-            <div class="player" id="p2-display">
-                <img id="p2-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P2">
-                <span id="p2-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">Aguardando...</span>
-                <span class="score-num" id="score-o">0</span>
+        
+        <div class="cyber-radio" id="radio-player">
+            <button id="btn-radio-toggle" class="radio-ctrl">⏵</button>
+            <div class="radio-info">
+                <span class="radio-title">Synthwave Station</span>
+                <span class="radio-status">Conectado</span>
             </div>
         </div>
 
-        <div id="status">Conectando...</div>
-
-        <div class="tabuleiro" id="tabuleiro">
-            <div class="casa" data-index="0"></div>
-            <div class="casa" data-index="1"></div>
-            <div class="casa" data-index="2"></div>
-            <div class="casa" data-index="3"></div>
-            <div class="casa" data-index="4"></div>
-            <div class="casa" data-index="5"></div>
-            <div class="casa" data-index="6"></div>
-            <div class="casa" data-index="7"></div>
-            <div class="casa" data-index="8"></div>
+        <div class="user-profile-badge">
+            <div class="user-stats-compact">
+                <span id="player-rank-title" class="rank-badge">Netrunner</span>
+                <span id="player-bits" class="bits-currency">⚡ 0 BITS</span>
+            </div>
+            <img id="headerAvatar" class="global-user-img" src="" alt="Avatar do Jogador">
+            <span id="headerNome" class="global-user-name">Carregando conta...</span>
+            <button id="btn-open-inventory" class="btn-inv" title="Inventário de Glitch Boxes">🎁 <span id="box-count">0</span></button>
         </div>
-        <br>
-        <button class="btn-sair" id="btn-sair">Sair da Sala</button>
+    </header>
+
+    <div class="hub-layout-container">
+        
+        <aside class="cyber-sidebar">
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-target="tela-lobby">🎮 Arcade Lobby</button>
+                <button class="nav-item" data-target="painel-loja">🏪 Loja Neon</button>
+                <button class="nav-item" data-target="painel-corporacoes">🏢 Megacorporações</button>
+                <button class="nav-item" data-target="painel-torneios">🏆 Torneios</button>
+                <button class="nav-item" data-target="painel-data-center">📊 Data Center</button>
+            </nav>
+            
+            <div class="widget-contratos" id="widget-diario">
+                <h4>CONTRATOS DIÁRIOS</h4>
+                <div class="lista-contratos">
+                    <div class="contrato-item" data-id="1">
+                        <span class="desc">Vencer 3 partidas hoje</span>
+                        <span class="recompensa">⚡ +150 BITS</span>
+                    </div>
+                    <div class="contrato-item concluido" data-id="2">
+                        <span class="desc">Enviar mensagem no chat</span>
+                        <span class="recompensa">⚡ COMPLETO</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="game-wrapper">
+
+            <section class="container-lobby hub-panel active" id="tela-lobby">
+                
+                <div class="lobby-card creation-panel">
+                    <h3>Configurar Matriz de Jogo</h3>
+                    
+                    <div class="form-group">
+                        <label for="select-jogo-base">Selecione o Software</label>
+                        <select id="select-jogo-base">
+                            <option value="velha">Neon Tic-Tac-Toe (Velha)</option>
+                            <option value="pacman">Cyber-Pacman (Canvas)</option>
+                            <option value="pong">Cyber Pong: Overdrive (Canvas)</option>
+                            <option value="lightcycles">Neon Lightcycles (Canvas)</option>
+                            <option value="combat">Grid Combat 2D (Canvas)</option>
+                            <option value="chess">Holo-Chess (Tabuleiro)</option>
+                            <option value="artillery">Neon Artillery (Canvas)</option>
+                            <option value="snake">Cyber Snake Arena (Canvas)</option>
+                            <option value="invaders">Glitch Invaders Versus (Canvas)</option>
+                            <option value="cards">Netrunner Cards (Cards)</option>
+                            <option value="memory">Memory Matrix (Agilidade)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-sala">Identificador (Nome da Sala)</label>
+                        <input type="text" id="input-sala" placeholder="Ex: Servidor de Hacking...">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group flex-1">
+                            <label for="select-dimensao">Grade / Escala</label>
+                            <select id="select-dimensao">
+                                <option value="3">Clássico (3x3 / Padrão)</option>
+                                <option value="4">Expandido (4x4)</option>
+                                <option value="5">Cyber (5x5)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group flex-1">
+                            <label for="select-modo">Diretriz de Jogo</label>
+                            <select id="select-modo">
+                                <option value="classico">Tradicional</option>
+                                <option value="relogio">Contra o Tempo</option>
+                                <option value="infinito">Pontuação Progressiva</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="btn-criar" class="btn-primary">Injetar na Rede</button>
+                </div>
+
+                <div class="lobby-card rooms-panel">
+                    <h3>Salas Ativas Disponíveis</h3>
+                    <div class="lista-salas" id="lista-salas-container">
+                        <div class="no-rooms-message">Nenhuma sala ativa no momento. Seja o primeiro a criar!</div>
+                    </div>
+                </div>
+                
+            </section>
+
+            <section class="hub-panel" id="painel-loja">
+                <h3>Mercado Negro de Cosméticos</h3>
+                <div class="loja-grid">
+                    <div class="card-item-loja">
+                        <div class="item-preview border-glow-pink">Avatar Border</div>
+                        <h4>Borda Neon Magenta</h4>
+                        <button class="btn-comprar">⚡ 500 BITS</button>
+                    </div>
+                    <div class="card-item-loja">
+                        <div class="item-preview token-gold">X Gold</div>
+                        <h4>Símbolo X Dourado</h4>
+                        <button class="btn-comprar">⚡ 1200 BITS</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hub-panel" id="painel-corporacoes">
+                <h3>Megacorporações da Rede</h3>
+                <div class="corp-container">
+                    <div class="corp-creation">
+                        <input type="text" id="input-nome-corp" placeholder="Nome da Corp...">
+                        <button class="btn-secondary">Fundar Corporação</button>
+                    </div>
+                    <div class="corp-leaderboard">
+                        <h4>Rankings Globais de Facções</h4>
+                        <div id="lista-corporacoes-ranking"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hub-panel" id="painel-torneios">
+                <h3>Torneios Organizados da Rede</h3>
+                <div class="tournament-bracket-zone">
+                    <p>Inicie ou junte-se a chaves competitivas automáticas de 4 a 8 participantes.</p>
+                    <button class="btn-primary">Criar Chave Corporativa</button>
+                </div>
+            </section>
+
+            <section class="hub-panel" id="painel-data-center">
+                <h3>Painel Analítico de Combate</h3>
+                <div class="stats-dashboard-grid">
+                    <div class="stat-box"><h5>Vitórias Totais</h5><span id="stat-wins">0</span></div>
+                    <div class="stat-box"><h5>Win Rate</h5><span id="stat-rate">0%</span></div>
+                    <div class="stat-box"><h5>Streak Atual</h5><span id="stat-streak">0</span></div>
+                </div>
+            </section>
+
+            <section id="area-jogo" class="container-gameplay">
+                
+                <div class="game-meta-layout">
+                    <div class="game-meta-info">
+                        <span id="info-nome-jogo" class="badge-jogo">Jogo: Tic-Tac-Toe</span>
+                        <span id="info-modo-sala" class="badge-modo">Modo: Clássico</span>
+                        <span id="info-grade-sala" class="badge-grade">Grade: 3x3</span>
+                    </div>
+                    
+                    <div id="spectator-counter" class="badge-spectator">👁️ 0 Assistindo</div>
+                </div>
+
+                <div class="gameplay-split-screen">
+                    
+                    <div class="gameplay-left-side">
+                        <div class="placar-container">
+                            <div class="player-card" id="p1-display">
+                                <div class="avatar-wrapper">
+                                    <img id="p1-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Jogador 1">
+                                    <span class="symbol-indicator symbol-x">X</span>
+                                </div>
+                                <span id="p1-name" class="player-username">Aguardando...</span>
+                                <span class="score-num" id="score-x">0</span>
+                            </div>
+
+                            <div class="vs-divider">VS</div>
+
+                            <div class="player-card" id="p2-display">
+                                <div class="avatar-wrapper">
+                                    <img id="p2-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Jogador 2">
+                                    <span class="symbol-indicator symbol-o">O</span>
+                                </div>
+                                <span id="p2-name" class="player-username">Aguardando...</span>
+                                <span class="score-num" id="score-o">0</span>
+                            </div>
+                        </div>
+
+                        <div id="status" class="status-alert-box">Conectando ao servidor...</div>
+
+                        <div class="tabuleiro-viewport" id="viewport-sistema">
+                            
+                            <div class="tabuleiro grid-3x3" id="tabuleiro">
+                                <div class="casa" data-index="0"></div>
+                                <div class="casa" data-index="1"></div>
+                                <div class="casa" data-index="2"></div>
+                                <div class="casa" data-index="3"></div>
+                                <div class="casa" data-index="4"></div>
+                                <div class="casa" data-index="5"></div>
+                                <div class="casa" data-index="6"></div>
+                                <div class="casa" data-index="7"></div>
+                                <div class="casa" data-index="8"></div>
+                            </div>
+
+                            <canvas id="arcade-engine-canvas" width="600" height="400" style="display: none;"></canvas>
+                        </div>
+
+                        <div class="game-controls">
+                            <button class="btn-secondary btn-sair" id="btn-sair">Abandonar Partida</button>
+                        </div>
+                    </div>
+
+                    <div class="gameplay-right-side chat-panel">
+                        <div class="chat-header"><h4>Canal Seguro da Sala</h4></div>
+                        <div class="historico-chat" id="chat-mensagens">
+                            <div class="msg-chat sistema">Criptografia de ponta estabelecida no servidor.</div>
+                        </div>
+                        <div class="chat-inputs">
+                            <input type="text" id="input-msg-chat" placeholder="Injetar dados no chat..." autocomplete="off">
+                            <button id="btn-enviar-msg" class="btn-send">⚡</button>
+                        </div>
+                    </div>
+
+                </div>
+                
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-glitchbox" class="modal-overlay" style="display: none;">
+        <div class="modal-box-content">
+            <h3 class="anim-glitch-text">SISTEMA GLITCH BOX</h3>
+            <div class="lootbox-vfx-container" id="box-container-animation">
+                <div class="box-cube"></div>
+            </div>
+            <div id="box-reward-display" class="reward-zone" style="display: none;">
+                <p>Item Desbloqueado!</p>
+                <div id="reward-name" class="reward-title">Nenhum</div>
+            </div>
+            <button id="btn-trigger-open" class="btn-primary">Descriptografar Caixa</button>
+            <button id="btn-close-box" class="btn-secondary">Fechar Terminal</button>
+        </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // --- INSTÂNCIA INTEGRADA DO BANCO DE DADOS LOCAL ---
+        // --- PRESERVAÇÃO INTEGRAL DO BANCO DE DADOS LOCAL (SAVE DE CONTA) ---
         const ContaSistema = {
             STORAGE_KEY: 'meu_game_user_account',
             dadosPadrao: {
@@ -313,12 +283,14 @@
             }
         };
 
-        // Carrega dados locais na Inicialização da Página
         const meuPerfilLocal = ContaSistema.carregar();
-        document.getElementById('headerAvatar').src = meuPerfilLocal.foto;
-        document.getElementById('headerNome').textContent = meuPerfilLocal.nome;
+        const meuNomeConfirmado = meuPerfilLocal.nome;
+        const minhaFotoConfirmada = meuPerfilLocal.foto;
 
-        // --- SISTEMA MULTIPLAYER (Socket.io) ---
+        document.getElementById('headerAvatar').src = minhaFotoConfirmada;
+        document.getElementById('headerNome').textContent = meuNomeConfirmado;
+
+        // --- CONEXÃO MULTIPLAYER (Socket.io) ---
         const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
         const socket = io(URL_SERVIDOR);
 
@@ -333,20 +305,34 @@
         const statusText = document.getElementById('status');
         const lobby = document.getElementById('tela-lobby');
         const jogoArea = document.getElementById('area-jogo');
+        const FOTO_PADRAO = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-        // Recebe e renderiza as salas disponíveis mostrando o avatar do dono
+        // Sistema de abas nativo para alternar sem recarregar a página
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.hub-panel').forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+            });
+        });
+
+        // Escuta e renderiza salas ativas
         socket.on('lista-salas', (salas) => {
             const container = document.getElementById('lista-salas-container');
             container.innerHTML = "";
             if (salas.length === 0) {
-                container.innerHTML = '<div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa. Crie uma!</div>';
+                container.innerHTML = '<div class="no-rooms-message">Nenhuma sala ativa. Crie uma!</div>';
                 return;
             }
             salas.forEach(sala => {
                 if (sala.jogadores < 2) {
-                    // Pega a foto do dono transmitida pelo servidor (ou usa a padrão se indisponível)
-                    const fotoDono = sala.donoFoto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    const fotoDono = sala.donoFoto || FOTO_PADRAO;
                     const nomeDono = sala.donoNome || "Desconhecido";
+                    const modoSala = sala.modo || "clássico";
+                    const tamGrade = sala.dimensao ? `${sala.dimensao}x${sala.dimensao}` : "3x3";
+                    const jogoAtivo = sala.jogo || "VELHA";
 
                     const item = document.createElement('div');
                     item.className = 'item-sala';
@@ -354,11 +340,11 @@
                         <div class="sala-info-bloco">
                             <img class="sala-dono-avatar" src="${fotoDono}" alt="Dono">
                             <div class="sala-detalhes">
-                                <span><b>${sala.nome}</b></span>
-                                <span style="font-size:0.75rem; color:#a8a8b3;">Dono: ${nomeDono} (${sala.jogadores}/2)</span>
+                                <span class="sala-titulo"><b>${sala.nome}</b></span>
+                                <span class="sala-meta">Software: ${jogoAtivo.toUpperCase()} | Modo: ${modoSala.toUpperCase()} (${tamGrade})</span>
                             </div>
                         </div>
-                        <button onclick="entrarNaSala('${sala.nome}')">Entrar</button>
+                        <button class="btn-join" onclick="entrarNaSala('${sala.nome}')">Entrar (${sala.jogadores}/2)</button>
                     `;
                     container.appendChild(item);
                 }
@@ -367,20 +353,45 @@
 
         document.getElementById('btn-criar').addEventListener('click', () => {
             const nomeSala = document.getElementById('input-sala').value.trim();
-            if (nomeSala) entrarNaSala(nomeSala);
+            const dimensaoEscolhida = document.getElementById('select-dimensao').value;
+            const modoEscolhido = document.getElementById('select-modo').value;
+            const jogoEscolhido = document.getElementById('select-jogo-base').value;
+
+            if (nomeSala) {
+                entrarNaSala(nomeSala, dimensaoEscolhida, modoEscolhido, jogoEscolhido);
+            }
         });
 
-        function entrarNaSala(nomeSala) {
+        function entrarNaSala(nomeSala, dimensao = "3", modo = "classico", jogo = "velha") {
             minhaSala = nomeSala;
-            lobby.style.display = "none";
+            
+            // Oculta todos os painéis e exibe apenas o ambiente de jogo
+            document.querySelectorAll('.hub-panel').forEach(p => p.classList.remove('active'));
             jogoArea.style.display = "block";
             statusText.innerText = "Entrando na sala...";
 
-            // MODIFICAÇÃO PRO: Envia os dados estruturados da conta para o Servidor Multiplayer sincronizar
+            document.getElementById('info-nome-jogo').innerText = `Jogo: ${jogo.toUpperCase()}`;
+            document.getElementById('info-modo-sala').innerText = `Modo: ${modo.toUpperCase()}`;
+            document.getElementById('info-grade-sala').innerText = `Grade: ${dimensao}x${dimensao}`;
+
+            // Chaveamento dinâmico visual para Canvas ou Grid
+            const canvasView = document.getElementById('arcade-engine-canvas');
+            const gridView = document.getElementById('tabuleiro');
+            if (jogo === "velha" || jogo === "chess") {
+                canvasView.style.display = "none";
+                gridView.style.display = "grid";
+            } else {
+                canvasView.style.display = "block";
+                gridView.style.display = "none";
+            }
+
             socket.emit('entrar-na-sala', {
                 sala: minhaSala,
-                jogadorNome: meuPerfilLocal.nome,
-                jogadorFoto: meuPerfilLocal.foto
+                jogadorNome: meuNomeConfirmado,
+                jogadorFoto: minhaFotoConfirmada,
+                dimensao: dimensao,
+                modo: modo,
+                jogo: jogo
             });
         }
 
@@ -390,35 +401,50 @@
         });
 
         socket.on('player-assignment', (dados) => {
-            // Nota: Se o seu servidor legado enviar apenas a string do símbolo ("X" ou "O") em vez de um objeto,
-            // essa condicional garante retrocompatibilidade inteligente.
             const simbolo = typeof dados === 'object' ? dados.simbolo : dados;
             meuSimbolo = simbolo;
 
             if (simbolo === "X") {
                 statusText.innerText = "Você é o Player 1 (X). Aguardando oponente...";
-                document.getElementById('p1-name').innerText = meuPerfilLocal.nome;
-                document.getElementById('p1-avatar').src = meuPerfilLocal.foto;
+                document.getElementById('p1-name').innerText = meuNomeConfirmado;
+                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
                 document.getElementById('p1-display').classList.add('ativo');
                 meuTurno = true;
             } else {
                 statusText.innerText = "Você é o Player 2 (O). Sincronizando partida...";
-                document.getElementById('p2-name').innerText = meuPerfilLocal.nome;
-                document.getElementById('p2-avatar').src = meuPerfilLocal.foto;
+                document.getElementById('p2-name').innerText = meuNomeConfirmado;
+                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
                 document.getElementById('p2-display').classList.add('ativo');
                 meuTurno = false;
             }
         });
 
-        // Evento que recebe dados dos perfis da sala quando a partida inicia
         socket.on('room-info', (info) => {
-            if (info.p1) {
-                document.getElementById('p1-name').innerText = info.p1.nome;
-                document.getElementById('p1-avatar').src = info.p1.foto;
-            }
-            if (info.p2) {
-                document.getElementById('p2-name').innerText = info.p2.nome;
-                document.getElementById('p2-avatar').src = info.p2.foto;
+            if (!meuSimbolo) return;
+
+            if (meuSimbolo === "X") {
+                document.getElementById('p1-name').innerText = meuNomeConfirmado;
+                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
+                
+                if (info && info.p2) {
+                    document.getElementById('p2-name').innerText = info.p2.nome;
+                    document.getElementById('p2-avatar').src = (info.p2.foto && info.p2.foto.length > 10) ? info.p2.foto : FOTO_PADRAO;
+                } else {
+                    document.getElementById('p2-name').innerText = "Aguardando...";
+                    document.getElementById('p2-avatar').src = FOTO_PADRAO;
+                }
+            } 
+            else if (meuSimbolo === "O") {
+                document.getElementById('p2-name').innerText = meuNomeConfirmado;
+                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
+                
+                if (info && info.p1) {
+                    document.getElementById('p1-name').innerText = info.p1.nome;
+                    document.getElementById('p1-avatar').src = (info.p1.foto && info.p1.foto.length > 10) ? info.p1.foto : FOTO_PADRAO;
+                } else {
+                    document.getElementById('p1-name').innerText = "Aguardando...";
+                    document.getElementById('p1-avatar').src = FOTO_PADRAO;
+                }
             }
         });
 
@@ -442,7 +468,7 @@
 
         function fazerJogadaLocal(index, simbolo) {
             tabuleiroEstado[index] = simbolo;
-            casas[index].innerText = simbolo;
+            if(casas[index]) casas[index].innerText = simbolo;
             meuTurno = (simbolo !== meuSimbolo);
             
             if (!checarResultado()) {
@@ -454,6 +480,14 @@
             statusText.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
             document.getElementById('p1-display').classList.toggle('ativo', meuTurno && meuSimbolo === "X" || !meuTurno && meuSimbolo === "O");
             document.getElementById('p2-display').classList.toggle('ativo', meuTurno && meuSimbolo === "O" || !meuTurno && meuSimbolo === "X");
+            
+            if (meuSimbolo === "X") {
+                document.getElementById('p1-name').innerText = meuNomeConfirmado;
+                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
+            } else if (meuSimbolo === "O") {
+                document.getElementById('p2-name').innerText = meuNomeConfirmado;
+                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
+            }
         }
 
         function checarResultado() {
@@ -484,8 +518,8 @@
             if (vencedor === "Empate") {
                 statusText.innerText = "A rodada empatou! Reiniciando em 3 segundos...";
             } else {
-                if (caminhoGanhador) {
-                    caminhoGanhador.forEach(i => casas[i].setAttribute('data-venceu', 'true'));
+                if (caminhoGanhador && casas) {
+                    caminhoGanhador.forEach(i => { if(casas[i]) casas[i].setAttribute('data-venceu', 'true'); });
                 }
                 if (vencedor === "X") vitoriasX++;
                 if (vencedor === "O") vitoriasO++;
