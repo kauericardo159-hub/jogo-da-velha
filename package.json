@@ -1,14 +1,13 @@
 {
-  "name": "cyber-arcade-hub-server",
+  "name": "servidor-jogo-da-velha",
   "version": "1.0.0",
-  "description": "Servidor multiplayer multi-jogos com suporte a salas, chat em tempo real, sincronização de canvas e modo espectador",
+  "description": "Servidor multiplayer para jogo da velha",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.21.2",
-    "socket.io": "^4.8.1"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
   }
 }

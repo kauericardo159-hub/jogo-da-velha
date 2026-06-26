@@ -6,218 +6,154 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
 });
 
-// Estrutura das salas estendida para a arquitetura do Hub
-// salas[nomeSala] = { 
-//    jogadores: [], 
-//    espectadores: [], 
-//    dimensao: "3", 
-//    modo: "classico", 
-//    jogo: "velha" 
-// }
+// Estrutura das salas: 
+// { "nomeDaSala": { jogadores: [ { id, simbolo, nome, foto } ] } }
 const salas = {};
 
-// Envia a lista de salas atualizada com suporte ao tipo de jogo e espectadores
-function enviarListaSalas() {
-    const lista = Object.keys(salas).map(nome => {
-        const salaObjeto = salas[nome];
-        const jogadores = salaObjeto.jogadores;
-        const dono = jogadores[0]; 
-        
+/**
+ * Função utilitária para mapear e enviar a lista de salas públicas disponíveis 
+ * para todos os usuários que estão ociosos no lobby.
+ */
+function enviarListaSalas(destino = io) {
+    const lista = Object.keys(salas).map(nomeSala => {
+        const jogadores = salas[nomeSala].jogadores;
+        const dono = jogadores[0]; // O primeiro a entrar é o dono da sala
         return {
-            nome: nome,
+            nome: nomeSala,
             jogadores: jogadores.length,
-            espectadores: salaObjeto.espectadores ? salaObjeto.espectadores.length : 0,
-            dimensao: salaObjeto.dimensao || "3",
-            modo: salaObjeto.modo || "classico",
-            jogo: salaObjeto.jogo || "velha",
             donoNome: dono ? dono.nome : "Desconhecido",
-            donoFoto: dono ? dono.foto : "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            donoFoto: dono ? dono.foto : ""
         };
     });
-    io.emit('lista-salas', lista);
+    destino.emit('lista-salas', lista);
 }
 
 io.on('connection', (socket) => {
-    console.log(`👤 Conectado à Rede: ${socket.id}`);
-    
-    enviarListaSalas();
+    console.log(`Usuário conectado: ${socket.id}`);
 
+    // Envia as salas disponíveis imediatamente assim que o cliente conecta no lobby
+    enviarListaSalas(socket);
+
+    // O jogador pede para entrar ou criar uma sala
     socket.on('entrar-na-sala', (dados) => {
-        const nomeSala = typeof dados === 'object' ? dados.sala : dados;
-        const nomeJogador = dados.jogadorNome || "Jogador_Novo";
-        let fotoJogador = dados.jogadorFoto || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        
-        // Parâmetros estendidos do Hub
-        const dimensaoSala = dados.dimensao || "3";
-        const modoSala = dados.modo || "classico";
-        const jogoEscolhido = dados.jogo || "velha";
+        const nomeSala = dados.sala;
+        const jogadorNome = dados.jogadorNome || "Jogador Anônimo";
+        const jogadorFoto = dados.jogadorFoto || "";
 
-        // 🛡️ TRAVA DE SEGURANÇA CONTRA ULTRA-PAYLOADS (ANTI-ESTOURO DE BUFFER)
-        if (fotoJogador.startsWith('data:') && fotoJogador.length > 150000) { 
-            console.log(`⚠️ Alerta: Avatar Base64 de "${nomeJogador}" excede limite estável. Reduzindo.`);
-            fotoJogador = "https://cdn-icons-png.flaticon.com/512/149/149071.png"; 
-        }
+        if (!nomeSala) return;
 
-        // Inicializa a sala com a nova chave de jogo e array de espectadores
+        // Se a sala não existe, inicializa a estrutura
         if (!salas[nomeSala]) {
-            salas[nomeSala] = {
-                jogadores: [],
-                espectadores: [],
-                dimensao: dimensaoSala,
-                modo: modoSala,
-                jogo: jogoEscolhido
-            };
+            salas[nomeSala] = { jogadores: [] };
         }
 
-        const salaAtual = salas[nomeSala];
+        const salaAtiva = salas[nomeSala];
 
-        // MOTO DO MODO ESPECTADOR (Ideia 6)
-        // Se já existem 2 players ativos, o terceiro entra como telespectador na sala
-        if (salaAtual.jogadores.length >= 2) {
-            salaAtual.espectadores.push({
-                id: socket.id,
-                nome: nomeJogador
-            });
-            
-            socket.join(nomeSala);
-            socket.emit('player-assignment', 'SPECTATOR');
-            
-            // Avisa a sala sobre a nova contagem de espectadores
-            io.to(nomeSala).emit('spectator-update', salaAtual.espectadores.length);
-            
-            // Sincroniza o estado atual dos players para o espectador ver
-            const infoSala = {
-                dimensao: salaAtual.dimensao,
-                modo: salaAtual.modo,
-                jogo: salaAtual.jogo,
-                p1: salaAtual.jogadores[0] ? { nome: salaAtual.jogadores[0].nome, foto: salaAtual.jogadores[0].foto } : null,
-                p2: salaAtual.jogadores[1] ? { nome: salaAtual.jogadores[1].nome, foto: salaAtual.jogadores[1].foto } : null
-            };
-            socket.emit('room-info', infoSala);
-            
-            enviarListaSalas();
+        // Se a sala já tiver 2 jogadores, impede o terceiro de entrar
+        if (salaAtiva.jogadores.length >= 2) {
+            socket.emit('status', 'Sala cheia');
             return;
         }
 
-        // Definição de competidores (X ou O)
-        const simbolo = salaAtual.jogadores.length === 0 ? "X" : "O";
+        // Define o símbolo dinamicamente (Primeiro a entrar = X, Segundo = O)
+        const simbolo = salaAtiva.jogadores.length === 0 ? "X" : "O";
         
-        salaAtual.jogadores.push({ 
+        // Estrutura do novo jogador com metadados de perfil
+        const novoJogador = { 
             id: socket.id, 
             simbolo: simbolo, 
-            nome: nomeJogador,
-            foto: fotoJogador
-        });
-        
-        socket.join(nomeSala);
-        socket.emit('player-assignment', simbolo);
-
-        const infoSala = {
-            dimensao: salaAtual.dimensao,
-            modo: salaAtual.modo,
-            jogo: salaAtual.jogo,
-            p1: salaAtual.jogadores[0] ? { nome: salaAtual.jogadores[0].nome, foto: salaAtual.jogadores[0].foto } : null,
-            p2: salaAtual.jogadores[1] ? { nome: salaAtual.jogadores[1].nome, foto: salaAtual.jogadores[1].foto } : null
+            nome: jogadorNome, 
+            foto: jogadorFoto 
         };
         
-        setTimeout(() => {
-            io.to(nomeSala).emit('room-info', infoSala);
-            io.to(nomeSala).emit('spectator-update', salaAtual.espectadores.length);
-            
-            if (salaAtual.jogadores.length === 2) {
-                io.to(nomeSala).emit('start-game');
-            }
-        }, 60);
+        salaAtiva.jogadores.push(novoJogador);
+        socket.join(nomeSala);
+        
+        // 1. Define quem o jogador recém-conectado é (Envia o objeto completo para bater com o app.js)
+        socket.emit('player-assignment', { simbolo: simbolo });
 
+        // 2. Sincroniza as informações de avatares/nomes da sala inteira
+        const p1 = salaAtiva.jogadores.find(j => j.simbolo === "X");
+        const p2 = salaAtiva.jogadores.find(j => j.simbolo === "O");
+        
+        io.to(nomeSala).emit('room-info', {
+            p1: p1 ? { nome: p1.nome, foto: p1.foto } : null,
+            p2: p2 ? { nome: p2.nome, foto: p2.foto } : null
+        });
+
+        // 3. Se a sala completou 2 pessoas, inicia a partida
+        if (salaAtiva.jogadores.length === 2) {
+            io.to(nomeSala).emit('start-game');
+        }
+
+        // Atualiza o lobby global de todos os navegadores conectados
         enviarListaSalas();
     });
 
-    // 💬 SISTEMA DE CHAT SEGURO DA SALA (Ideia Integrada)
-    socket.on('send-chat-message', (dados) => {
-        // Envia para todos da sala, incluindo quem enviou e espectadores
-        io.to(dados.sala).emit('receive-chat-message', {
-            autor: dados.autor,
-            texto: dados.texto,
-            timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        });
-    });
-
-    // 🎯 EVENTO DE JOGADA TRADICIONAL (Para jogos baseados em Grid como Velha/Xadrez)
+    // Escuta os movimentos e repassa para o rival na sala correspondente
     socket.on('make-move', (dados) => {
         socket.to(dados.sala).emit('move-made', dados);
     });
 
-    // 🚀 CANAL DE ALTA VELOCIDADE (Para sincronizar motores gráficos de Canvas em tempo real)
-    // Usado para enviar posições x, y da cobrinha, bolinha do pong, tiros, etc.
-    socket.on('game-engine-sync', (dados) => {
-        socket.to(dados.sala).emit('game-engine-broadcast', dados);
-    });
-
-    // 🏅 GERENCIADOR DE RECOMPENSAS GLOBAL
-    // Chamado quando o jogo detecta um fim de rodada/partida para dar Bits aos clientes
-    socket.on('match-finished', (dados) => {
-        // Dispara o evento para o vencedor e perdedor processarem seus Bits localmente
-        io.to(dados.sala).emit('distribute-rewards', {
-            vencedorSimbolo: dados.vencedorSimbolo, // "X", "O" ou "Empate"
-            ganhoBits: dados.modo === 'torneio' ? 300 : 100 // Exemplo de bonificação por modo
-        });
-    });
-
-    socket.on('reiniciar-rodada', (dados) => {
-        socket.to(dados.sala).emit('rodada-reiniciada');
-    });
-
+    // Evento explícito de desistência/saída por clique de botão
     socket.on('sair-da-sala', (nomeSala) => {
-        sair(socket, nomeSala);
+        removerJogadorDeSalas(socket, nomeSala);
     });
 
+    // Gerencia quedas bruscas de conexão, internet ou fechamento de abas
     socket.on('disconnect', () => {
-        for (const nomeSala in salas) {
-            sair(socket, nomeSala);
-        }
+        console.log(`Usuário desconectado: ${socket.id}`);
+        removerJogadorDeSalas(socket);
     });
 });
 
-function sair(socket, nomeSala) {
-    if (salas[nomeSala]) {
-        const salaAtual = salas[nomeSala];
-        
-        // Verifica se quem está saindo é um jogador ativo ou um mero espectador
-        const eraJogador = salaAtual.jogadores.some(j => j.id === socket.id);
+/**
+ * Localiza, limpa o jogador de dentro do escopo de memória do servidor, 
+ * notifica o oponente remanescente e atualiza a listagem global.
+ */
+function removerJogadorDeSalas(socket, nomeSalaEspecifica = null) {
+    for (const nomeSala in salas) {
+        // Se passamos uma sala específica, pula as outras
+        if (nomeSalaEspecifica && nomeSala !== nomeSalaEspecifica) continue;
 
-        if (eraJogador) {
-            salaAtual.jogadores = salaAtual.jogadores.filter(j => j.id !== socket.id);
+        const salaAtiva = salas[nomeSala];
+        const index = salaAtiva.jogadores.findIndex(j => j.id === socket.id);
+        
+        if (index !== -1) {
+            // Remove o jogador do array interno
+            salaAtiva.jogadores.splice(index, 1);
             socket.leave(nomeSala);
             
-            // Se um jogador desconecta, avisa os outros e encerra ou passa a vitória por W.O.
+            // Avisa o rival que ele venceu por W.O. devido ao abandono
             io.to(nomeSala).emit('player-disconnected');
-        } else if (salaAtual.espectadores) {
-            // Se era espectador, apenas remove do array auxiliar
-            salaAtual.espectadores = salaAtual.espectadores.filter(e => e.id !== socket.id);
-            socket.leave(nomeSala);
-            io.to(nomeSala).emit('spectator-update', salaAtual.espectadores.length);
+            
+            // Destrói a sala caso fique vazia para economizar memória do servidor
+            if (salaAtiva.jogadores.length === 0) {
+                delete salas[nomeSala];
+            } else {
+                // Se alguém sobrou, atualiza os dados da sala dele (removendo as infos do que saiu)
+                const p1 = salaAtiva.jogadores.find(j => j.simbolo === "X");
+                const p2 = salaAtiva.jogadores.find(j => j.simbolo === "O");
+                io.to(nomeSala).emit('room-info', {
+                    p1: p1 ? { nome: p1.nome, foto: p1.foto } : null,
+                    p2: p2 ? { nome: p2.nome, foto: p2.foto } : null
+                });
+            }
+
+            // Atualiza o lobby geral para sincronizar a mudança de vagas
+            enviarListaSalas();
+            break;
         }
-        
-        // Se a sala esvaziou totalmente de jogadores reais, deleta da rede
-        if (salaAtual.jogadores.length === 0) {
-            delete salas[nomeSala];
-        } else {
-            // Atualiza os painéis informativos para quem sobrou
-            const infoSala = {
-                dimensao: salaAtual.dimensao,
-                modo: salaAtual.modo,
-                jogo: salaAtual.jogo,
-                p1: salaAtual.jogadores[0] ? { nome: salaAtual.jogadores[0].nome, foto: salaAtual.jogadores[0].foto } : null,
-                p2: salaAtual.jogadores[1] ? { nome: salaAtual.jogadores[1].nome, foto: salaAtual.jogadores[1].foto } : null
-            };
-            io.to(nomeSala).emit('room-info', infoSala);
-        }
-        enviarListaSalas();
     }
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Servidor Hub rodando com sucesso na porta ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Servidor rodando perfeitamente na porta ${PORT}`);
+});

@@ -3,294 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Arcade Hub - Pro Evolution</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Jogo da Velha Multiplayer Pro</title>
+    <style>
+        /* CSS Avançado - Tema Cyberpunk / Dark Matchmaking */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0c0c12;
+            color: #e1e1e6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        /* Header de Identificação Global da Conta */
+        .header-perfil-game {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: #14141d;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 25px;
+            align-self: flex-start;
+        }
+
+        .header-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #8257e5;
+            object-fit: cover;
+        }
+
+        .header-nome {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .header-bits {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #00f0ff;
+            background: rgba(0, 240, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-left: 5px;
+        }
+
+        h1 {
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            font-size: 1.8rem;
+        }
+
+        /* Tela 1: Lobby e Matchmaking */
+        .container-lobby {
+            background-color: #14141d;
+            padding: 2rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+            margin-top: 15px;
+        }
+
+        .secao-criar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #0c0c12;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #8257e5;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-neon {
+            background-color: #8257e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
+        }
+
+        .btn-neon:hover {
+            background-color: #9466ff;
+            transform: translateY(-1px);
+        }
+
+        .sub-titulo-lobby {
+            text-align: left;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #00f0ff;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .lista-salas {
+            background-color: #0c0c12;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .item-sala {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .item-sala:last-child { border-bottom: none; }
+
+        .sala-info-bloco { display: flex; align-items: center; gap: 10px; text-align: left; }
+        .sala-dono-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #04d361; }
+        .sala-detalhes { display: flex; flex-direction: column; }
+        .sala-nome-txt { font-weight: bold; font-size: 0.9rem; color: #fff; }
+        .sala-vagas { font-size: 0.75rem; color: #7c7c8a; }
+
+        .item-sala button {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            background-color: #1c1c24;
+            color: #00f0ff;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .item-sala button:hover {
+            background-color: #00f0ff;
+            color: #0c0c12;
+        }
+
+        .no-salas {
+            font-size: 0.85rem;
+            color: #7c7c8a;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Tela 2: Campo de Batalha (Invisível no início) */
+        .area-jogo {
+            display: none;
+            width: 100%;
+            max-width: 440px;
+            margin-top: 10px;
+        }
+
+        /* Painel de Exibição dos Versus e Avatares */
+        .painel-versus {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #14141d;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 40%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        /* Borda Neon dinâmica ativada via classe .ativo */
+        .card-player.p1-style.ativo { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
+        .card-player.p2-style.ativo { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.2); }
+
+        .player-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #0c0c12; }
+        .player-nome { font-size: 0.85rem; font-weight: 700; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+        .player-score { font-size: 1.4rem; font-weight: 800; color: #fff; }
+
+        .centro-vs { font-weight: 800; font-size: 0.9rem; color: #7c7c8a; }
+
+        #status {
+            font-size: 1rem;
+            color: #04d361;
+            font-weight: 600;
+            margin-bottom: 20px;
+            min-height: 24px;
+            text-align: center;
+        }
+
+        /* Tabuleiro Grid Pro */
+        .tabuleiro {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 0 auto;
+            width: 320px;
+            height: 320px;
+        }
+
+        .casa {
+            background-color: #14141d;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 2.8rem;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: #fff;
+        }
+        .casa:hover {
+            background-color: #1c1c24;
+            border-color: #8257e5;
+        }
+
+        /* Destaque para casas que ganharam a rodada */
+        .casa[data-venceu="true"] {
+            background-color: #04d361 !important;
+            color: #0c0c12 !important;
+            box-shadow: 0 0 20px rgba(4, 211, 97, 0.4);
+        }
+
+        .btn-abandonar {
+            background-color: transparent;
+            color: #ff4b4b;
+            font-size: 0.85rem;
+            text-decoration: underline;
+            margin-top: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            padding: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
 </head>
 <body>
 
-    <header class="global-user-header">
-        <div class="header-left">
-            <span class="brand-logo">NIGHT·ARCADE 🕹️</span>
-        </div>
-        
-        <div class="cyber-radio" id="radio-player">
-            <button id="btn-radio-toggle" class="radio-ctrl">⏵</button>
-            <div class="radio-info">
-                <span class="radio-title">Synthwave Station</span>
-                <span class="radio-status">Conectado</span>
-            </div>
-        </div>
-
-        <div class="user-profile-badge">
-            <div class="user-stats-compact">
-                <span id="player-rank-title" class="rank-badge">Netrunner</span>
-                <span id="player-bits" class="bits-currency">⚡ 0 BITS</span>
-            </div>
-            <img id="headerAvatar" class="global-user-img" src="" alt="Avatar do Jogador">
-            <span id="headerNome" class="global-user-name">Carregando conta...</span>
-            <button id="btn-open-inventory" class="btn-inv" title="Inventário de Glitch Boxes">🎁 <span id="box-count">0</span></button>
-        </div>
-    </header>
-
-    <div class="hub-layout-container">
-        
-        <aside class="cyber-sidebar">
-            <nav class="sidebar-nav">
-                <button class="nav-item active" data-target="tela-lobby">🎮 Arcade Lobby</button>
-                <button class="nav-item" data-target="painel-loja">🏪 Loja Neon</button>
-                <button class="nav-item" data-target="painel-corporacoes">🏢 Megacorporações</button>
-                <button class="nav-item" data-target="painel-torneios">🏆 Torneios</button>
-                <button class="nav-item" data-target="painel-data-center">📊 Data Center</button>
-            </nav>
-            
-            <div class="widget-contratos" id="widget-diario">
-                <h4>CONTRATOS DIÁRIOS</h4>
-                <div class="lista-contratos">
-                    <div class="contrato-item" data-id="1">
-                        <span class="desc">Vencer 3 partidas hoje</span>
-                        <span class="recompensa">⚡ +150 BITS</span>
-                    </div>
-                    <div class="contrato-item concluido" data-id="2">
-                        <span class="desc">Enviar mensagem no chat</span>
-                        <span class="recompensa">⚡ COMPLETO</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="game-wrapper">
-
-            <section class="container-lobby hub-panel active" id="tela-lobby">
-                
-                <div class="lobby-card creation-panel">
-                    <h3>Configurar Matriz de Jogo</h3>
-                    
-                    <div class="form-group">
-                        <label for="select-jogo-base">Selecione o Software</label>
-                        <select id="select-jogo-base">
-                            <option value="velha">Neon Tic-Tac-Toe (Velha)</option>
-                            <option value="pacman">Cyber-Pacman (Canvas)</option>
-                            <option value="pong">Cyber Pong: Overdrive (Canvas)</option>
-                            <option value="lightcycles">Neon Lightcycles (Canvas)</option>
-                            <option value="combat">Grid Combat 2D (Canvas)</option>
-                            <option value="chess">Holo-Chess (Tabuleiro)</option>
-                            <option value="artillery">Neon Artillery (Canvas)</option>
-                            <option value="snake">Cyber Snake Arena (Canvas)</option>
-                            <option value="invaders">Glitch Invaders Versus (Canvas)</option>
-                            <option value="cards">Netrunner Cards (Cards)</option>
-                            <option value="memory">Memory Matrix (Agilidade)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="input-sala">Identificador (Nome da Sala)</label>
-                        <input type="text" id="input-sala" placeholder="Ex: Servidor de Hacking...">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group flex-1">
-                            <label for="select-dimensao">Grade / Escala</label>
-                            <select id="select-dimensao">
-                                <option value="3">Clássico (3x3 / Padrão)</option>
-                                <option value="4">Expandido (4x4)</option>
-                                <option value="5">Cyber (5x5)</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group flex-1">
-                            <label for="select-modo">Diretriz de Jogo</label>
-                            <select id="select-modo">
-                                <option value="classico">Tradicional</option>
-                                <option value="relogio">Contra o Tempo</option>
-                                <option value="infinito">Pontuação Progressiva</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button id="btn-criar" class="btn-primary">Injetar na Rede</button>
-                </div>
-
-                <div class="lobby-card rooms-panel">
-                    <h3>Salas Ativas Disponíveis</h3>
-                    <div class="lista-salas" id="lista-salas-container">
-                        <div class="no-rooms-message">Nenhuma sala ativa no momento. Seja o primeiro a criar!</div>
-                    </div>
-                </div>
-                
-            </section>
-
-            <section class="hub-panel" id="painel-loja">
-                <h3>Mercado Negro de Cosméticos</h3>
-                <div class="loja-grid">
-                    <div class="card-item-loja">
-                        <div class="item-preview border-glow-pink">Avatar Border</div>
-                        <h4>Borda Neon Magenta</h4>
-                        <button class="btn-comprar">⚡ 500 BITS</button>
-                    </div>
-                    <div class="card-item-loja">
-                        <div class="item-preview token-gold">X Gold</div>
-                        <h4>Símbolo X Dourado</h4>
-                        <button class="btn-comprar">⚡ 1200 BITS</button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="hub-panel" id="painel-corporacoes">
-                <h3>Megacorporações da Rede</h3>
-                <div class="corp-container">
-                    <div class="corp-creation">
-                        <input type="text" id="input-nome-corp" placeholder="Nome da Corp...">
-                        <button class="btn-secondary">Fundar Corporação</button>
-                    </div>
-                    <div class="corp-leaderboard">
-                        <h4>Rankings Globais de Facções</h4>
-                        <div id="lista-corporacoes-ranking"></div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="hub-panel" id="painel-torneios">
-                <h3>Torneios Organizados da Rede</h3>
-                <div class="tournament-bracket-zone">
-                    <p>Inicie ou junte-se a chaves competitivas automáticas de 4 a 8 participantes.</p>
-                    <button class="btn-primary">Criar Chave Corporativa</button>
-                </div>
-            </section>
-
-            <section class="hub-panel" id="painel-data-center">
-                <h3>Painel Analítico de Combate</h3>
-                <div class="stats-dashboard-grid">
-                    <div class="stat-box"><h5>Vitórias Totais</h5><span id="stat-wins">0</span></div>
-                    <div class="stat-box"><h5>Win Rate</h5><span id="stat-rate">0%</span></div>
-                    <div class="stat-box"><h5>Streak Atual</h5><span id="stat-streak">0</span></div>
-                </div>
-            </section>
-
-            <section id="area-jogo" class="container-gameplay">
-                
-                <div class="game-meta-layout">
-                    <div class="game-meta-info">
-                        <span id="info-nome-jogo" class="badge-jogo">Jogo: Tic-Tac-Toe</span>
-                        <span id="info-modo-sala" class="badge-modo">Modo: Clássico</span>
-                        <span id="info-grade-sala" class="badge-grade">Grade: 3x3</span>
-                    </div>
-                    
-                    <div id="spectator-counter" class="badge-spectator">👁️ 0 Assistindo</div>
-                </div>
-
-                <div class="gameplay-split-screen">
-                    
-                    <div class="gameplay-left-side">
-                        <div class="placar-container">
-                            <div class="player-card" id="p1-display">
-                                <div class="avatar-wrapper">
-                                    <img id="p1-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Jogador 1">
-                                    <span class="symbol-indicator symbol-x">X</span>
-                                </div>
-                                <span id="p1-name" class="player-username">Aguardando...</span>
-                                <span class="score-num" id="score-x">0</span>
-                            </div>
-
-                            <div class="vs-divider">VS</div>
-
-                            <div class="player-card" id="p2-display">
-                                <div class="avatar-wrapper">
-                                    <img id="p2-avatar" class="placar-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Jogador 2">
-                                    <span class="symbol-indicator symbol-o">O</span>
-                                </div>
-                                <span id="p2-name" class="player-username">Aguardando...</span>
-                                <span class="score-num" id="score-o">0</span>
-                            </div>
-                        </div>
-
-                        <div id="status" class="status-alert-box">Conectando ao servidor...</div>
-
-                        <div class="tabuleiro-viewport" id="viewport-sistema">
-                            
-                            <div class="tabuleiro grid-3x3" id="tabuleiro">
-                                <div class="casa" data-index="0"></div>
-                                <div class="casa" data-index="1"></div>
-                                <div class="casa" data-index="2"></div>
-                                <div class="casa" data-index="3"></div>
-                                <div class="casa" data-index="4"></div>
-                                <div class="casa" data-index="5"></div>
-                                <div class="casa" data-index="6"></div>
-                                <div class="casa" data-index="7"></div>
-                                <div class="casa" data-index="8"></div>
-                            </div>
-
-                            <canvas id="arcade-engine-canvas" width="600" height="400" style="display: none;"></canvas>
-                        </div>
-
-                        <div class="game-controls">
-                            <button class="btn-secondary btn-sair" id="btn-sair">Abandonar Partida</button>
-                        </div>
-                    </div>
-
-                    <div class="gameplay-right-side chat-panel">
-                        <div class="chat-header"><h4>Canal Seguro da Sala</h4></div>
-                        <div class="historico-chat" id="chat-mensagens">
-                            <div class="msg-chat sistema">Criptografia de ponta estabelecida no servidor.</div>
-                        </div>
-                        <div class="chat-inputs">
-                            <input type="text" id="input-msg-chat" placeholder="Injetar dados no chat..." autocomplete="off">
-                            <button id="btn-enviar-msg" class="btn-send">⚡</button>
-                        </div>
-                    </div>
-
-                </div>
-                
-            </section>
-        </main>
+    <div class="header-perfil-game">
+        <img id="headerAvatar" class="header-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Meu Avatar">
+        <span id="headerNome" class="header-nome">Carregando...</span>
+        <span id="headerBits" class="header-bits">⚡ 0</span>
     </div>
 
-    <div id="modal-glitchbox" class="modal-overlay" style="display: none;">
-        <div class="modal-box-content">
-            <h3 class="anim-glitch-text">SISTEMA GLITCH BOX</h3>
-            <div class="lootbox-vfx-container" id="box-container-animation">
-                <div class="box-cube"></div>
-            </div>
-            <div id="box-reward-display" class="reward-zone" style="display: none;">
-                <p>Item Desbloqueado!</p>
-                <div id="reward-name" class="reward-title">Nenhum</div>
-            </div>
-            <button id="btn-trigger-open" class="btn-primary">Descriptografar Caixa</button>
-            <button id="btn-close-box" class="btn-secondary">Fechar Terminal</button>
+    <h1>Jogo da Velha Online 🕹️</h1>
+
+    <div class="container-lobby" id="tela-lobby">
+        <div class="secao-criar">
+            <input type="text" id="input-sala" placeholder="Nome da nova sala..." maxlength="14">
+            <button class="btn-neon" id="btn-criar">Criar Sala</button>
+        </div>
+
+        <div class="sub-titulo-lobby">Salas Ativas Disponíveis</div>
+        <div class="lista-salas" id="lista-salas-container">
+            <div class="no-salas">Nenhuma matriz aberta. Inicie uma nova!</div>
         </div>
     </div>
 
+    <div class="area-jogo" id="area-jogo">
+        
+        <div class="painel-versus">
+            <div class="card-player p1-style" id="p1-display">
+                <img id="p1-avatar" class="player-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P1">
+                <span id="p1-name" class="player-nome">Jogador 1</span>
+                <span id="score-x" class="player-score">0</span>
+            </div>
+
+            <div class="centro-vs">VS</div>
+
+            <div class="card-player p2-style" id="p2-display">
+                <img id="p2-avatar" class="player-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P2">
+                <span id="p2-name" class="player-nome">Aguardando...</span>
+                <span id="score-o" class="player-score">0</span>
+            </div>
+        </div>
+
+        <div id="status">Sincronizando dados de partida...</div>
+
+        <div class="tabuleiro" id="tabuleiro">
+            <div class="casa" data-index="0"></div>
+            <div class="casa" data-index="1"></div>
+            <div class="casa" data-index="2"></div>
+            <div class="casa" data-index="3"></div>
+            <div class="casa" data-index="4"></div>
+            <div class="casa" data-index="5"></div>
+            <div class="casa" data-index="6"></div>
+            <div class="casa" data-index="7"></div>
+            <div class="casa" data-index="8"></div>
+        </div>
+
+        <button class="btn-abandonar" id="btn-sair">Desistir e Sair da Sala</button>
+    </div>
+
+    <!-- Módulos de Scripts Criptografados -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // --- PRESERVAÇÃO INTEGRAL DO BANCO DE DADOS LOCAL (SAVE DE CONTA) ---
+        // ==========================================================
+        // CONTROLE INTEGRADO DA ECONOMIA DO CONTA.JS
+        // ==========================================================
         const ContaSistema = {
             STORAGE_KEY: 'meu_game_user_account',
             dadosPadrao: {
-                nome: "Jogador_Novo",
-                gender: "masculino",
+                nome: "Netrunner_Novo",
                 foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                modelo3d: ""
+                bits: 0
             },
             carregar: function() {
-                const dadosSalvos = localStorage.getItem(this.STORAGE_KEY);
-                if (dadosSalvos) {
-                    const parsed = JSON.parse(dadosSalvos);
-                    return {
-                        nome: parsed.nome || this.dadosPadrao.nome,
-                        foto: parsed.foto || this.dadosPadrao.foto
-                    };
-                }
-                return this.dadosPadrao;
+                try {
+                    const local = localStorage.getItem(this.STORAGE_KEY);
+                    if (local) {
+                        const parsed = JSON.parse(local);
+                        return {
+                            nome: parsed.nome || this.dadosPadrao.nome,
+                            foto: parsed.foto || this.dadosPadrao.foto,
+                            bits: parsed.bits !== undefined ? Number(parsed.bits) : this.dadosPadrao.bits
+                        };
+                    }
+                } catch(e) { console.warn("Erro ao carregar storage:", e); }
+                return { ...this.dadosPadrao };
+            },
+            modificarBits: function(qtd) {
+                const conta = this.carregar();
+                conta.bits = Math.max(0, conta.bits + qtd);
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(conta));
+                this.atualizarUI();
+                return conta.bits;
+            },
+            atualizarUI: function() {
+                const conta = this.carregar();
+                document.getElementById('headerAvatar').src = conta.foto;
+                document.getElementById('headerNome').textContent = conta.nome;
+                document.getElementById('headerBits').textContent = `⚡ ${conta.bits}`;
             }
         };
 
-        const meuPerfilLocal = ContaSistema.carregar();
-        const meuNomeConfirmado = meuPerfilLocal.nome;
-        const minhaFotoConfirmada = meuPerfilLocal.foto;
+        // Inicialização primária dos perfis locais
+        const perfilAtivo = ContaSistema.carregar();
+        window.addEventListener('DOMContentLoaded', () => ContaSistema.atualizarUI());
 
-        document.getElementById('headerAvatar').src = minhaFotoConfirmada;
-        document.getElementById('headerNome').textContent = meuNomeConfirmado;
-
-        // --- CONEXÃO MULTIPLAYER (Socket.io) ---
+        // ==========================================================
+        // MOTOR MULTIPLAYER DE COMBATE (APP.JS INTEGRADO)
+        // ==========================================================
         const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
         const socket = io(URL_SERVIDOR);
 
@@ -303,95 +395,61 @@
 
         const casas = document.querySelectorAll('.casa');
         const statusText = document.getElementById('status');
-        const lobby = document.getElementById('tela-lobby');
+        const lobbyArea = document.getElementById('tela-lobby');
         const jogoArea = document.getElementById('area-jogo');
+        const containerSalas = document.getElementById('lista-salas-container');
         const FOTO_PADRAO = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-        // Sistema de abas nativo para alternar sem recarregar a página
-        document.querySelectorAll('.nav-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.hub-panel').forEach(p => p.classList.remove('active'));
-                
-                btn.classList.add('active');
-                document.getElementById(btn.getAttribute('data-target')).classList.add('active');
-            });
-        });
-
-        // Escuta e renderiza salas ativas
+        // Escuta e renderiza as salas livres na rede
         socket.on('lista-salas', (salas) => {
-            const container = document.getElementById('lista-salas-container');
-            container.innerHTML = "";
-            if (salas.length === 0) {
-                container.innerHTML = '<div class="no-rooms-message">Nenhuma sala ativa. Crie uma!</div>';
+            containerSalas.innerHTML = "";
+            if (!salas || salas.length === 0) {
+                containerSalas.innerHTML = '<div class="no-salas">Nenhuma matriz aberta. Inicie uma nova!</div>';
                 return;
             }
+            
             salas.forEach(sala => {
                 if (sala.jogadores < 2) {
                     const fotoDono = sala.donoFoto || FOTO_PADRAO;
-                    const nomeDono = sala.donoNome || "Desconhecido";
-                    const modoSala = sala.modo || "clássico";
-                    const tamGrade = sala.dimensao ? `${sala.dimensao}x${sala.dimensao}` : "3x3";
-                    const jogoAtivo = sala.jogo || "VELHA";
-
+                    const nomeDono = sala.donoNome || "User";
+                    
                     const item = document.createElement('div');
                     item.className = 'item-sala';
                     item.innerHTML = `
                         <div class="sala-info-bloco">
                             <img class="sala-dono-avatar" src="${fotoDono}" alt="Dono">
                             <div class="sala-detalhes">
-                                <span class="sala-titulo"><b>${sala.nome}</b></span>
-                                <span class="sala-meta">Software: ${jogoAtivo.toUpperCase()} | Modo: ${modoSala.toUpperCase()} (${tamGrade})</span>
+                                <span class="sala-nome-txt">${sala.nome}</span>
+                                <span class="sala-vagas">Criador: ${nomeDono}</span>
                             </div>
                         </div>
-                        <button class="btn-join" onclick="entrarNaSala('${sala.nome}')">Entrar (${sala.jogadores}/2)</button>
+                        <button onclick="entrarNaSala('${sala.nome}')">Conectar</button>
                     `;
-                    container.appendChild(item);
+                    containerSalas.appendChild(item);
                 }
             });
         });
 
+        // Evento do gatilho de criação
         document.getElementById('btn-criar').addEventListener('click', () => {
-            const nomeSala = document.getElementById('input-sala').value.trim();
-            const dimensaoEscolhida = document.getElementById('select-dimensao').value;
-            const modoEscolhido = document.getElementById('select-modo').value;
-            const jogoEscolhido = document.getElementById('select-jogo-base').value;
-
-            if (nomeSala) {
-                entrarNaSala(nomeSala, dimensaoEscolhida, modoEscolhido, jogoEscolhido);
+            let nomeSala = document.getElementById('input-sala').value.trim();
+            if (!nomeSala) {
+                // Auto gerador se o jogador esquecer de digitar um nome
+                nomeSala = `GRID_${Math.floor(Math.random() * 899 + 100)}`;
             }
+            entrarNaSala(nomeSala);
         });
 
-        function entrarNaSala(nomeSala, dimensao = "3", modo = "classico", jogo = "velha") {
+        function entrarNaSala(nomeSala) {
             minhaSala = nomeSala;
-            
-            // Oculta todos os painéis e exibe apenas o ambiente de jogo
-            document.querySelectorAll('.hub-panel').forEach(p => p.classList.remove('active'));
+            lobbyArea.style.display = "none";
             jogoArea.style.display = "block";
-            statusText.innerText = "Entrando na sala...";
-
-            document.getElementById('info-nome-jogo').innerText = `Jogo: ${jogo.toUpperCase()}`;
-            document.getElementById('info-modo-sala').innerText = `Modo: ${modo.toUpperCase()}`;
-            document.getElementById('info-grade-sala').innerText = `Grade: ${dimensao}x${dimensao}`;
-
-            // Chaveamento dinâmico visual para Canvas ou Grid
-            const canvasView = document.getElementById('arcade-engine-canvas');
-            const gridView = document.getElementById('tabuleiro');
-            if (jogo === "velha" || jogo === "chess") {
-                canvasView.style.display = "none";
-                gridView.style.display = "grid";
-            } else {
-                canvasView.style.display = "block";
-                gridView.style.display = "none";
-            }
+            statusText.innerText = "Negociando chaves com o servidor...";
 
             socket.emit('entrar-na-sala', {
                 sala: minhaSala,
-                jogadorNome: meuNomeConfirmado,
-                jogadorFoto: minhaFotoConfirmada,
-                dimensao: dimensao,
-                modo: modo,
-                jogo: jogo
+                jogadorNome: perfilAtivo.nome,
+                jogadorFoto: perfilAtivo.foto
             });
         }
 
@@ -405,51 +463,38 @@
             meuSimbolo = simbolo;
 
             if (simbolo === "X") {
-                statusText.innerText = "Você é o Player 1 (X). Aguardando oponente...";
-                document.getElementById('p1-name').innerText = meuNomeConfirmado;
-                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
-                document.getElementById('p1-display').classList.add('ativo');
+                statusText.innerText = "Você é o Player 1 [X]. Aguardando oponente...";
+                document.getElementById('p1-name').innerText = perfilAtivo.nome;
+                document.getElementById('p1-avatar').src = perfilAtivo.foto;
                 meuTurno = true;
             } else {
-                statusText.innerText = "Você é o Player 2 (O). Sincronizando partida...";
-                document.getElementById('p2-name').innerText = meuNomeConfirmado;
-                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
-                document.getElementById('p2-display').classList.add('ativo');
+                statusText.innerText = "Você é o Player 2 [O]. Sincronizando rodada...";
+                document.getElementById('p2-name').innerText = perfilAtivo.nome;
+                document.getElementById('p2-avatar').src = perfilAtivo.foto;
                 meuTurno = false;
             }
+            atualizarBrilhoBordaTurno();
         });
 
         socket.on('room-info', (info) => {
-            if (!meuSimbolo) return;
+            if (!meuSimbolo || !info) return;
 
             if (meuSimbolo === "X") {
-                document.getElementById('p1-name').innerText = meuNomeConfirmado;
-                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
-                
-                if (info && info.p2) {
+                if (info.p2) {
                     document.getElementById('p2-name').innerText = info.p2.nome;
-                    document.getElementById('p2-avatar').src = (info.p2.foto && info.p2.foto.length > 10) ? info.p2.foto : FOTO_PADRAO;
-                } else {
-                    document.getElementById('p2-name').innerText = "Aguardando...";
-                    document.getElementById('p2-avatar').src = FOTO_PADRAO;
+                    document.getElementById('p2-avatar').src = info.p2.foto || FOTO_PADRAO;
                 }
-            } 
-            else if (meuSimbolo === "O") {
-                document.getElementById('p2-name').innerText = meuNomeConfirmado;
-                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
-                
-                if (info && info.p1) {
+            } else if (meuSimbolo === "O") {
+                if (info.p1) {
                     document.getElementById('p1-name').innerText = info.p1.nome;
-                    document.getElementById('p1-avatar').src = (info.p1.foto && info.p1.foto.length > 10) ? info.p1.foto : FOTO_PADRAO;
-                } else {
-                    document.getElementById('p1-name').innerText = "Aguardando...";
-                    document.getElementById('p1-avatar').src = FOTO_PADRAO;
+                    document.getElementById('p1-avatar').src = info.p1.foto || FOTO_PADRAO;
                 }
             }
+            atualizarBrilhoBordaTurno();
         });
 
         socket.on('start-game', () => {
-            resgatarVez();
+            atualizarBrilhoBordaTurno();
         });
 
         casas.forEach(casa => {
@@ -457,69 +502,63 @@
                 const idx = casa.getAttribute('data-index');
                 if (!meuTurno || tabuleiroEstado[idx] !== "") return;
 
-                fazerJogadaLocal(idx, meuSimbolo);
+                executarMovimentoLocal(idx, meuSimbolo);
                 socket.emit('make-move', { sala: minhaSala, index: idx, simbolo: meuSimbolo });
             });
         });
 
         socket.on('move-made', (dados) => {
-            fazerJogadaLocal(dados.index, dados.simbolo);
+            executarMovimentoLocal(dados.index, dados.simbolo);
         });
 
-        function fazerJogadaLocal(index, simbolo) {
+        function executarMovimentoLocal(index, simbolo) {
             tabuleiroEstado[index] = simbolo;
             if(casas[index]) casas[index].innerText = simbolo;
             meuTurno = (simbolo !== meuSimbolo);
             
-            if (!checarResultado()) {
-                resgatarVez();
+            if (!checarGanhadores()) {
+                atualizarBrilhoBordaTurno();
             }
         }
 
-        function resgatarVez() {
-            statusText.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
-            document.getElementById('p1-display').classList.toggle('ativo', meuTurno && meuSimbolo === "X" || !meuTurno && meuSimbolo === "O");
-            document.getElementById('p2-display').classList.toggle('ativo', meuTurno && meuSimbolo === "O" || !meuTurno && meuSimbolo === "X");
+        function atualizarBrilhoBordaTurno() {
+            const vezDoP1 = (meuTurno && meuSimbolo === "X") || (!meuTurno && meuSimbolo === "O");
+            statusText.innerText = vezDoP1 ? "Sua vez de jogar!" : "Aguardando ação do oponente...";
             
-            if (meuSimbolo === "X") {
-                document.getElementById('p1-name').innerText = meuNomeConfirmado;
-                document.getElementById('p1-avatar').src = minhaFotoConfirmada;
-            } else if (meuSimbolo === "O") {
-                document.getElementById('p2-name').innerText = meuNomeConfirmado;
-                document.getElementById('p2-avatar').src = minhaFotoConfirmada;
-            }
+            document.getElementById('p1-display').classList.toggle('ativo', vezDoP1);
+            document.getElementById('p2-display').classList.toggle('ativo', !vezDoP1);
         }
 
-        function checarResultado() {
-            const caminhosVitoria = [
+        function checarGanhadores() {
+            const caminhosvenceu = [
                 [0,1,2], [3,4,5], [6,7,8],
                 [0,3,6], [1,4,7], [2,5,8],
                 [0,4,8], [2,4,6]
             ];
 
-            for (const caminho of caminhosVitoria) {
-                const [a, b, c] = caminho;
+            for (const item of caminhosvenceu) {
+                const [a, b, c] = item;
                 if (tabuleiroEstado[a] && tabuleiroEstado[a] === tabuleiroEstado[b] && tabuleiroEstado[a] === tabuleiroEstado[c]) {
-                    finalizarRodada(tabuleiroEstado[a], caminho);
+                    finalizarSessaoRodada(tabuleiroEstado[a], item);
                     return true;
                 }
             }
 
             if (!tabuleiroEstado.includes("")) {
-                finalizarRodada("Empate");
+                finalizarSessaoRodada("Empate");
                 return true;
             }
             return false;
         }
 
-        function finalizarRodada(vencedor, caminhoGanhador = null) {
+        function finalizarSessaoRodada(vencedor, comboAlinhado = null) {
             meuTurno = false;
             
             if (vencedor === "Empate") {
-                statusText.innerText = "A rodada empatou! Reiniciando em 3 segundos...";
+                statusText.innerText = "Empate Técnico na Matrix!";
             } else {
-                if (caminhoGanhador && casas) {
-                    caminhoGanhador.forEach(i => { if(casas[i]) casas[i].setAttribute('data-venceu', 'true'); });
+                if (comboAlinhado) {
+                    comboAlinhado.forEach(i => { if(casas[i]) casas[i].setAttribute('data-venceu', 'true'); });
                 }
                 if (vencedor === "X") vitoriasX++;
                 if (vencedor === "O") vitoriasO++;
@@ -527,33 +566,40 @@
                 document.getElementById('score-x').innerText = vitoriasX;
                 document.getElementById('score-o').innerText = vitoriasO;
 
-                statusText.innerText = vencedor === meuSimbolo ? "Você venceu esta rodada!" : "Oponente venceu esta rodada!";
+                statusText.innerText = vencedor === meuSimbolo ? "Você venceu a rodada!" : "O oponente quebrou seu sinal!";
             }
 
             setTimeout(() => {
                 if (vitoriasX === 3 || vitoriasO === 3) {
-                    const campeao = vitoriasX === 3 ? "Player 1 (X)" : "Player 2 (O)";
-                    alert(`🏆 FIM DE JOGO! O grande campeão foi o ${campeao}!`);
+                    const finalista = vitoriasX === 3 ? "X" : "O";
+                    if (meuSimbolo === finalista) {
+                        ContaSistema.modificarBits(50);
+                        alert("🏆 VITÓRIA DO SISTEMA! Você faturou +50 Bits!");
+                    } else {
+                        ContaSistema.modificarBits(5);
+                        alert("💀 CONEXÃO PERDIDA: Oponente fechou a melhor de 3. +5 Bits.");
+                    }
                     location.reload();
                 } else {
-                    proximaRodada();
+                    reiniciarGradeRodada();
                 }
-            }, 3000);
+            }, 2500);
         }
 
-        function proximaRodada() {
+        function reiniciarGradeRodada() {
             tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
             casas.forEach(casa => {
                 casa.innerText = "";
                 casa.removeAttribute('data-venceu');
             });
             meuTurno = (meuSimbolo === "O" && (vitoriasX + vitoriasO) % 2 !== 0) || (meuSimbolo === "X" && (vitoriasX + vitoriasO) % 2 === 0);
-            resgatarVez();
+            atualizarBrilhoBordaTurno();
         }
 
         socket.on('player-disconnected', () => {
-            statusText.innerText = "Oponente desconectou. Você venceu por W.O!";
-            setTimeout(() => location.reload(), 4000);
+            statusText.innerText = "Oponente desconectou da rede! Ganhador por W.O.";
+            ContaSistema.modificarBits(25);
+            setTimeout(() => location.reload(), 3000);
         });
     </script>
 </body>
