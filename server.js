@@ -1,3 +1,7 @@
+const dns = require('dns');
+// Força a resolução de nomes via IPv4 para evitar erro ENETUNREACH no Render
+dns.setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -14,8 +18,8 @@ const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// URL de conexão do Supabase
-const DATABASE_URL = "postgresql://postgres:%23Ka32210032_Proto@db.lgobrnkhbuspskbkppsd.supabase.co:5432/postgres";
+// URL de conexão usando a porta 6543 (Session Pooler - IPv4) e a senha codificada (%23)
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres.lgobrnkhbuspskbkppsd:%23Ka32210032_Proto@aws-0-sa-east-1.pooler.supabase.com:6543/postgres";
 
 const db = new Client({
     connectionString: DATABASE_URL,
