@@ -3,551 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Arcade Tic-Tac-Toe</title>
+    <title>Arcade Velha Multiplayer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <div class="brand">
-            <h1>Neon Arcade 🕹️</h1>
+    <h1>Neon Tic-Tac-Toe 🕹️</h1>
+
+    <div class="container-lobby" id="tela-lobby">
+        <h3>Criar uma Sala</h3>
+        <input type="text" id="input-sala" placeholder="Nome da sala...">
+        <button id="btn-criar">Criar e Entrar</button>
+
+        <h3>Salas Disponíveis</h3>
+        <div class="lista-salas" id="lista-salas-container">
+            <div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa no momento.</div>
         </div>
-        <div class="network-badge">
-            <div class="stat-item">
-                <span class="ping-indicator"></span>
-                <span>Ping: <b id="ping-val">--</b> ms</span>
-            </div>
-            <span>|</span>
-            <div class="stat-item">
-                <span>🌐 Online: <b id="count-online">0</b></span>
-            </div>
-            <span>|</span>
-            <div class="stat-item">
-                <span>🎮 Jogando: <b id="count-jogando">0</b></span>
-            </div>
-            <span>|</span>
-            <div class="stat-item">
-                <span>⏱️ Uptime: <b id="server-uptime">00:00:00</b></span>
-            </div>
-            <span>|</span>
-            <div class="stat-item">
-                <span>💾 RAM: <b id="server-mem">-- MB</b></span>
-            </div>
-        </div>
-    </header>
+    </div>
 
-    <div class="main-layout">
-        
-        <!-- PAINEL ESQUERDO: LOBBY, PERFIL E SELEÇÃO DE MODOS -->
-        <div class="card-panel" id="tela-lobby">
-            
-            <div class="section-title">👤 Seu Perfil</div>
-            <div class="auth-box">
-                <div class="profile-header">
-                    <div class="avatar-preview-container">
-                        <img id="avatar-preview" class="avatar-preview" src="https://i.imgur.com/6VBx3io.png" alt="Avatar">
-                        <span id="user-country" class="country-flag">🇧🇷</span>
-                    </div>
-                    <div style="flex: 1;">
-                        <input type="text" id="input-username" class="input-field" placeholder="Usuário..." style="margin-bottom: 5px;">
-                        <input type="password" id="input-password" class="input-field" placeholder="Senha...">
-                    </div>
-                </div>
-                <input type="text" id="input-avatar-url" class="input-field" placeholder="URL do Avatar / GIF...">
-                <button id="btn-auth" class="btn-primary">Entrar / Cadastrar</button>
-            </div>
-
-            <hr style="border-color: var(--card-border); margin: 15px 0;">
-
-            <!-- MODO OFFLINE (CONTRA BOT) -->
-            <div class="section-title">🤖 Jogar Offline (Contra Bot)</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-                <select id="select-dificuldade" class="input-field">
-                    <option value="facil">Fácil</option>
-                    <option value="medio" selected>Médio</option>
-                    <option value="impossivel">Impossível (Minimax)</option>
-                </select>
-                <button id="btn-bot" class="btn-primary" style="width: auto; padding: 0 15px; background: linear-gradient(135deg, #00f0ff, #7b2cbf);">Jogar</button>
-            </div>
-
-            <hr style="border-color: var(--card-border); margin: 15px 0;">
-
-            <!-- CRIAR / ENTRAR EM SALA MULTIPLAYER -->
-            <div class="section-title">➕ Criar / Entrar em Sala</div>
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
-                <input type="text" id="input-sala" class="input-field" placeholder="Nome da sala...">
-                <div style="display: flex; gap: 8px;">
-                    <input type="password" id="input-senha-sala" class="input-field" placeholder="Senha (Opcional)...">
-                    <button id="btn-criar" class="btn-primary" style="width: auto; padding: 0 20px;">Entrar</button>
-                </div>
-            </div>
-
-            <div class="section-title">🏠 Salas Ativas (<span id="count-salas">0</span>)</div>
-            <div class="scroll-list" id="lista-salas-container">
-                <div style="color: var(--text-muted); text-align: center; padding: 10px;">Nenhuma sala ativa. Crie uma!</div>
-            </div>
-
-            <hr style="border-color: var(--card-border); margin: 15px 0;">
-
-            <div class="section-title">👥 Jogadores Conectados</div>
-            <div class="scroll-list" id="lista-jogadores-container">
-                <div style="color: var(--text-muted); text-align: center; padding: 10px;">Carregando jogadores...</div>
-            </div>
-
+    <div id="area-jogo">
+        <div class="placar">
+            <div class="player" id="p1-display">Player 1 (X): <span id="score-x">0</span></div>
+            <div class="player" id="p2-display">Player 2 (O): <span id="score-o">0</span></div>
         </div>
 
-        <!-- PAINEL DIREITO: ÁREA DO JOGO -->
-        <div class="card-panel" id="area-jogo">
-            
-            <div class="scoreboard">
-                <div class="player-card" id="p1-display">
-                    <img id="p1-img" class="avatar-preview" src="https://i.imgur.com/6VBx3io.png" style="width:45px; height:45px;">
-                    <span id="p1-nome">Player 1</span>
-                    <div>(X): <b id="score-x">0</b></div>
-                </div>
+        <div id="status">Conectando...</div>
 
-                <div style="font-size: 1.2rem; font-weight: bold; color: var(--neon-pink);">VS</div>
-
-                <div class="player-card" id="p2-display">
-                    <img id="p2-img" class="avatar-preview" src="https://i.imgur.com/6VBx3io.png" style="width:45px; height:45px;">
-                    <span id="p2-nome">Aguardando...</span>
-                    <div>(O): <b id="score-o">0</b></div>
-                </div>
-            </div>
-
-            <div id="game-status">Aguardando segundo jogador...</div>
-
-            <div class="game-board" id="tabuleiro">
-                <div class="cell" data-index="0"></div>
-                <div class="cell" data-index="1"></div>
-                <div class="cell" data-index="2"></div>
-                <div class="cell" data-index="3"></div>
-                <div class="cell" data-index="4"></div>
-                <div class="cell" data-index="5"></div>
-                <div class="cell" data-index="6"></div>
-                <div class="cell" data-index="7"></div>
-                <div class="cell" data-index="8"></div>
-            </div>
-
-            <button class="btn-danger" id="btn-sair">Sair do Jogo</button>
-
+        <div class="tabuleiro" id="tabuleiro">
+            <div class="casa" data-index="0"></div>
+            <div class="casa" data-index="1"></div>
+            <div class="casa" data-index="2"></div>
+            <div class="casa" data-index="3"></div>
+            <div class="casa" data-index="4"></div>
+            <div class="casa" data-index="5"></div>
+            <div class="casa" data-index="6"></div>
+            <div class="casa" data-index="7"></div>
+            <div class="casa" data-index="8"></div>
         </div>
-
+        <br>
+        <button class="btn-sair" id="btn-sair">Sair da Sala</button>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        const socket = io();
+        const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
+        const socket = io(URL_SERVIDOR);
 
-        let perfil = {
-            id: null,
-            nome: localStorage.getItem('neon_user') || "Jogador",
-            avatar: localStorage.getItem('neon_avatar') || "https://i.imgur.com/6VBx3io.png",
-            pais: "BR"
-        };
-
-        let modoBot = false;
-        let dificuldadeBot = "medio";
         let minhaSala = "";
-        let meuSimbolo = "X"; 
+        let meuSimbolo = ""; 
         let meuTurno = false;
         let vitoriasX = 0;
         let vitoriasO = 0;
         let tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
 
-        // Elementos DOM
-        const inputUser = document.getElementById('input-username');
-        const inputPass = document.getElementById('input-password');
-        const inputAvatar = document.getElementById('input-avatar-url');
-        const avatarPreview = document.getElementById('avatar-preview');
-        const userCountry = document.getElementById('user-country');
-        const cells = document.querySelectorAll('.cell');
-        const gameStatus = document.getElementById('game-status');
-        const lobbyArea = document.getElementById('tela-lobby');
-        const gameArea = document.getElementById('area-jogo');
+        const casas = document.querySelectorAll('.casa');
+        const statusText = document.getElementById('status');
+        const lobby = document.getElementById('tela-lobby');
+        const jogoArea = document.getElementById('area-jogo');
 
-        inputUser.value = perfil.nome;
-        inputAvatar.value = perfil.avatar !== "https://i.imgur.com/6VBx3io.png" ? perfil.avatar : "";
-        avatarPreview.src = perfil.avatar;
-
-        function obterBandeiraEmoji(paisCode) {
-            if (!paisCode || paisCode.length !== 2) return '🌐';
-            const codePoints = paisCode
-                .toUpperCase()
-                .split('')
-                .map(char => 127397 + char.charCodeAt(0));
-            return String.fromCodePoint(...codePoints);
-        }
-
-        // Sistema Ping
-        setInterval(() => {
-            const start = Date.now();
-            socket.emit('ping-check', start, (timestamp) => {
-                document.getElementById('ping-val').innerText = Date.now() - timestamp;
-            });
-        }, 3000);
-
-        // Autenticação
-        document.getElementById('btn-auth').addEventListener('click', () => {
-            const username = inputUser.value.trim();
-            const password = inputPass.value.trim();
-            const avatar_url = inputAvatar.value.trim();
-
-            if (!username || !password) {
-                alert("Por favor, preencha usuário e senha!");
-                return;
-            }
-
-            socket.emit('autenticar', { username, password, avatar_url });
-        });
-
-        socket.on('auth-sucesso', (dados) => {
-            perfil = dados;
-            localStorage.setItem('neon_user', perfil.nome);
-            localStorage.setItem('neon_avatar', perfil.avatar);
-            avatarPreview.src = perfil.avatar;
-            userCountry.innerText = obterBandeiraEmoji(perfil.pais);
-            alert(`Bem-vindo, ${perfil.nome}! Logado com sucesso.`);
-        });
-
-        socket.on('auth-erro', (msg) => alert(msg));
-        socket.on('status-erro', (msg) => alert(msg));
-
-        // Atualização Global do Servidor
-        socket.on('status-global', (dados) => {
-            document.getElementById('count-online').innerText = dados.online;
-            document.getElementById('count-jogando').innerText = dados.jogando;
-            document.getElementById('server-uptime').innerText = dados.uptime || "00:00:00";
-            document.getElementById('server-mem').innerText = dados.memoria || "-- MB";
-            document.getElementById('count-salas').innerText = dados.totalSalas || "0";
-
-            const playersContainer = document.getElementById('lista-jogadores-container');
-            playersContainer.innerHTML = "";
-
-            if (!dados.jogadoresOnline || dados.jogadoresOnline.length === 0) {
-                playersContainer.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 10px;">Nenhum jogador online.</div>';
-                return;
-            }
-
-            dados.jogadoresOnline.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'player-item';
-                item.innerHTML = `
-                    <div class="player-info-mini">
-                        <img src="${p.avatar}" alt="avatar">
-                        <span>${obterBandeiraEmoji(p.pais)} <b>${p.nome}</b></span>
-                    </div>
-                    <span style="color: var(--neon-cyan);">🏆 ${p.vitorias || 0}</span>
-                `;
-                playersContainer.appendChild(item);
-            });
-        });
-
-        // Lista de Salas Ativas
+        // Recebe e desenha as salas ativas na tela inicial
         socket.on('lista-salas', (salas) => {
             const container = document.getElementById('lista-salas-container');
             container.innerHTML = "";
-
             if (salas.length === 0) {
-                container.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 10px;">Nenhuma sala ativa. Crie uma!</div>';
+                container.innerHTML = '<div style="color: #7c7c8a; text-align: center;">Nenhuma sala ativa. Crie uma!</div>';
                 return;
             }
-
             salas.forEach(sala => {
-                const item = document.createElement('div');
-                item.className = 'room-item';
-                const iconePrivado = sala.privada ? '🔒 ' : '';
-                item.innerHTML = `
-                    <span><b>${iconePrivado}${sala.nome}</b> (${sala.jogadores}/${sala.max})</span>
-                    ${sala.jogadores < 2 ? `<button class="btn-primary" style="width:auto; padding:4px 10px; font-size:0.8rem;" onclick="prepararEntradaSala('${sala.nome}', ${sala.privada})">Entrar</button>` : '<span style="color:var(--neon-pink); font-size:0.8rem;">Cheia</span>'}
-                `;
-                container.appendChild(item);
+                if (sala.jogadores < 2) {
+                    const item = document.createElement('div');
+                    item.className = 'item-sala';
+                    item.innerHTML = `<span><b>${sala.nome}</b> (${sala.jogadores}/2)</span>
+                                      <button onclick="entrarNaSala('${sala.nome}')">Entrar</button>`;
+                    container.appendChild(item);
+                }
             });
         });
 
         document.getElementById('btn-criar').addEventListener('click', () => {
             const nome = document.getElementById('input-sala').value.trim();
-            const senha = document.getElementById('input-senha-sala').value.trim();
-            if (nome) entrarNaSala(nome, senha);
+            if (nome) entrarNaSala(nome);
         });
 
-        function prepararEntradaSala(nome, ehPrivada) {
-            let senha = "";
-            if (ehPrivada) {
-                senha = prompt("Esta sala é protegida. Digite a senha:") || "";
-            }
-            entrarNaSala(nome, senha);
-        }
-
-        function entrarNaSala(nome, senha = "") {
-            modoBot = false;
+        function entrarNaSala(nome) {
             minhaSala = nome;
-            lobbyArea.style.display = "none";
-            gameArea.style.display = "flex";
-            gameStatus.innerText = "Conectando na sala...";
-            socket.emit('entrar-na-sala', { nomeSala: minhaSala, senha: senha });
+            lobby.style.display = "none";
+            jogoArea.style.display = "block";
+            statusText.innerText = "Entrando na sala...";
+            socket.emit('entrar-na-sala', minhaSala);
         }
-
-        // --- MODO OFFLINE (BOT) ---
-        document.getElementById('btn-bot').addEventListener('click', () => {
-            modoBot = true;
-            dificuldadeBot = document.getElementById('select-dificuldade').value;
-            lobbyArea.style.display = "none";
-            gameArea.style.display = "flex";
-            
-            meuSimbolo = "X";
-            meuTurno = true;
-            vitoriasX = 0;
-            vitoriasO = 0;
-
-            document.getElementById('p1-nome').innerText = perfil.nome;
-            document.getElementById('p1-img').src = perfil.avatar;
-            document.getElementById('p2-nome').innerText = `Bot (${dificuldadeBot.toUpperCase()})`;
-            document.getElementById('p2-img').src = "https://i.imgur.com/R38E31g.png";
-
-            reiniciarTabuleiro();
-        });
 
         document.getElementById('btn-sair').addEventListener('click', () => {
-            if (!modoBot) socket.emit('sair-da-sala', minhaSala);
-            location.reload();
+            socket.emit('sair-da-sala', minhaSala);
+            location.reload(); // Recarrega a página para voltar ao lobby limpo
         });
 
-        // Eventos Multiplayer
-        socket.on('player-assignment', (dados) => {
-            meuSimbolo = dados.simbolo;
-            if (meuSimbolo === "X") {
-                document.getElementById('p1-nome').innerText = perfil.nome;
-                document.getElementById('p1-img').src = perfil.avatar;
-                gameStatus.innerText = "Aguardando oponente entrar...";
+        socket.on('player-assignment', (simbolo) => {
+            meuSimbolo = simbolo;
+            if (simbolo === "X") {
+                statusText.innerText = "Você é o Player 1 (X). Aguardando oponente...";
+                document.getElementById('p1-display').classList.add('ativo');
                 meuTurno = true;
             } else {
-                document.getElementById('p2-nome').innerText = perfil.nome;
-                document.getElementById('p2-img').src = perfil.avatar;
-                const p1 = dados.jogadores.find(j => j.simbolo === "X");
-                if (p1) {
-                    document.getElementById('p1-nome').innerText = p1.nome;
-                    document.getElementById('p1-img').src = p1.avatar;
-                }
-                gameStatus.innerText = "Aguardando início...";
+                statusText.innerText = "Você é o Player 2 (O). Aguardando início...";
+                document.getElementById('p2-display').classList.add('ativo');
                 meuTurno = false;
             }
         });
 
-        socket.on('oponente-entrou', (oponente) => {
-            if (meuSimbolo === "X") {
-                document.getElementById('p2-nome').innerText = oponente.nome;
-                document.getElementById('p2-img').src = oponente.avatar;
-            }
+        socket.on('start-game', () => {
+            resgatarVez();
         });
 
-        socket.on('start-game', (dados) => {
-            const p1 = dados.jogadores.find(j => j.simbolo === "X");
-            const p2 = dados.jogadores.find(j => j.simbolo === "O");
-            if (p1) {
-                document.getElementById('p1-nome').innerText = p1.nome;
-                document.getElementById('p1-img').src = p1.avatar;
-            }
-            if (p2) {
-                document.getElementById('p2-nome').innerText = p2.nome;
-                document.getElementById('p2-img').src = p2.avatar;
-            }
-            atualizarTurnoUI();
-        });
-
-        // Tabuleiro e Cliques
-        cells.forEach(cell => {
-            cell.addEventListener('click', () => {
-                const idx = parseInt(cell.getAttribute('data-index'));
+        casas.forEach(casa => {
+            casa.addEventListener('click', () => {
+                const idx = casa.getAttribute('data-index');
                 if (!meuTurno || tabuleiroEstado[idx] !== "") return;
 
-                executarJogadaLocal(idx, meuSimbolo);
-
-                if (modoBot) {
-                    if (!verificarVitoria()) {
-                        meuTurno = false;
-                        atualizarTurnoUI();
-                        setTimeout(jogadaBot, 600);
-                    }
-                } else {
-                    socket.emit('make-move', { sala: minhaSala, index: idx, simbolo: meuSimbolo });
-                }
+                fazerJogadaLocal(idx, meuSimbolo);
+                socket.emit('make-move', { sala: minhaSala, index: idx, simbolo: meuSimbolo });
             });
         });
 
         socket.on('move-made', (dados) => {
-            executarJogadaLocal(dados.index, dados.simbolo);
+            fazerJogadaLocal(dados.index, dados.simbolo);
         });
 
-        function executarJogadaLocal(index, simbolo) {
+        function fazerJogadaLocal(index, simbolo) {
             tabuleiroEstado[index] = simbolo;
-            cells[index].innerText = simbolo;
-            cells[index].style.color = simbolo === "X" ? "var(--neon-cyan)" : "var(--neon-pink)";
+            casas[index].innerText = simbolo;
             meuTurno = (simbolo !== meuSimbolo);
-
-            if (!verificarVitoria()) {
-                atualizarTurnoUI();
+            
+            if (!checarResultado()) {
+                resgatarVez();
             }
         }
 
-        // Lógica da Inteligência Artificial (Bot Offline)
-        function jogadaBot() {
-            let indicioEscolha = -1;
-            const vazios = tabuleiroEstado.map((val, idx) => val === "" ? idx : null).filter(v => v !== null);
-
-            if (vazios.length === 0) return;
-
-            if (dificuldadeBot === "facil") {
-                indicioEscolha = vazios[Math.floor(Math.random() * vazios.length)];
-            } else if (dificuldadeBot === "medio") {
-                // Tenta ganhar ou bloquear
-                indicioEscolha = encontrarJogadaEstrategica("O") || encontrarJogadaEstrategica("X") || vazios[Math.floor(Math.random() * vazios.length)];
-            } else {
-                // Impossível (Minimax)
-                indicioEscolha = melhorJogadaMinimax();
-            }
-
-            executarJogadaLocal(indicioEscolha, "O");
+        function resgatarVez() {
+            statusText.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
+            document.getElementById('p1-display').classList.toggle('ativo', meuTurno && meuSimbolo === "X" || !meuTurno && meuSimbolo === "O");
+            document.getElementById('p2-display').classList.toggle('ativo', meuTurno && meuSimbolo === "O" || !meuTurno && meuSimbolo === "X");
         }
 
-        function encontrarJogadaEstrategica(simbolo) {
-            const comb = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            for (let c of comb) {
-                const vals = c.map(i => tabuleiroEstado[i]);
-                if (vals.filter(v => v === simbolo).length === 2 && vals.includes("")) {
-                    return c[vals.indexOf("")];
-                }
-            }
-            return null;
-        }
-
-        function melhorJogadaMinimax() {
-            let melhorNota = -Infinity;
-            let movimento = -1;
-            for (let i = 0; i < 9; i++) {
-                if (tabuleiroEstado[i] === "") {
-                    tabuleiroEstado[i] = "O";
-                    let nota = minimax(tabuleiroEstado, 0, false);
-                    tabuleiroEstado[i] = "";
-                    if (nota > melhorNota) {
-                        melhorNota = nota;
-                        movimento = i;
-                    }
-                }
-            }
-            return movimento;
-        }
-
-        function minimax(board, depth, isMaximizing) {
-            const comb = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            for (let c of comb) {
-                if (board[c[0]] && board[c[0]] === board[c[1]] && board[c[0]] === board[c[2]]) {
-                    return board[c[0]] === "O" ? 10 - depth : depth - 10;
-                }
-            }
-            if (!board.includes("")) return 0;
-
-            if (isMaximizing) {
-                let melhor = -Infinity;
-                for (let i = 0; i < 9; i++) {
-                    if (board[i] === "") {
-                        board[i] = "O";
-                        melhor = Math.max(melhor, minimax(board, depth + 1, false));
-                        board[i] = "";
-                    }
-                }
-                return melhor;
-            } else {
-                let melhor = Infinity;
-                for (let i = 0; i < 9; i++) {
-                    if (board[i] === "") {
-                        board[i] = "X";
-                        melhor = Math.min(melhor, minimax(board, depth + 1, true));
-                        board[i] = "";
-                    }
-                }
-                return melhor;
-            }
-        }
-
-        function atualizarTurnoUI() {
-            gameStatus.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
-            document.getElementById('p1-display').classList.toggle('active', (meuTurno && meuSimbolo === "X") || (!meuTurno && meuSimbolo === "O"));
-            document.getElementById('p2-display').classList.toggle('active', (meuTurno && meuSimbolo === "O") || (!meuTurno && meuSimbolo === "X"));
-        }
-
-        function verificarVitoria() {
-            const combinacoes = [
-                [0,1,2], [3,4,5], [6,7,8],
-                [0,3,6], [1,4,7], [2,5,8],
-                [0,4,8], [2,4,6]
+        function checarResultado() {
+            const caminhosVitoria = [
+                [0,1,2], [3,4,5], [6,7,8], // Linhas
+                [0,3,6], [1,4,7], [2,5,8], // Colunas
+                [0,4,8], [2,4,6]           // Diagonais
             ];
 
-            for (const combo of combinacoes) {
-                const [a, b, c] = combo;
+            for (const caminho of caminhosVitoria) {
+                const [a, b, c] = caminho;
                 if (tabuleiroEstado[a] && tabuleiroEstado[a] === tabuleiroEstado[b] && tabuleiroEstado[a] === tabuleiroEstado[c]) {
-                    encerrarRodada(tabuleiroEstado[a], combo);
+                    finalizarRodada(tabuleiroEstado[a], caminho);
                     return true;
                 }
             }
 
             if (!tabuleiroEstado.includes("")) {
-                encerrarRodada("Empate");
+                finalizarRodada("Empate");
                 return true;
             }
-
             return false;
         }
 
-        function encerrarRodada(vencedor, linhaVencedora = null) {
+        function finalizarRodada(vencedor, caminhoGanhador = null) {
             meuTurno = false;
-
+            
             if (vencedor === "Empate") {
-                gameStatus.innerText = "A rodada empatou!";
+                statusText.innerText = "A rodada empatou! Reiniciando em 3 segundos...";
             } else {
-                if (linhaVencedora) {
-                    linhaVencedora.forEach(i => cells[i].setAttribute('data-winner', 'true'));
+                if (caminhoGanhador) {
+                    caminhoGanhador.forEach(i => casas[i].setAttribute('data-venceu', 'true'));
                 }
-
                 if (vencedor === "X") vitoriasX++;
                 if (vencedor === "O") vitoriasO++;
 
                 document.getElementById('score-x').innerText = vitoriasX;
                 document.getElementById('score-o').innerText = vitoriasO;
 
-                if (vencedor === meuSimbolo) {
-                    gameStatus.innerText = "🏆 Você venceu esta rodada!";
-                    if (!modoBot) socket.emit('registrar-vitoria');
-                } else {
-                    gameStatus.innerText = "❌ Oponente venceu a rodada!";
-                }
+                statusText.innerText = vencedor === meuSimbolo ? "Você venceu esta rodada!" : "Oponente venceu esta rodada!";
             }
 
+            // Verifica se a partida inteira (3 rounds) acabou
             setTimeout(() => {
                 if (vitoriasX === 3 || vitoriasO === 3) {
-                    alert(`🏆 FIM DE JOGO! Campeão: ${vitoriasX === 3 ? 'Player 1 (X)' : 'Player 2 (O)'}`);
+                    const campeao = vitoriasX === 3 ? "Player 1 (X)" : "Player 2 (O)";
+                    alert(`🏆 FIM DE JOGO! O grande campeão foi o ${campeao}!`);
                     location.reload();
                 } else {
-                    reiniciarTabuleiro();
+                    proximaRodada();
                 }
-            }, 2500);
+            }, 3000);
         }
 
-        function reiniciarTabuleiro() {
+        function proximaRodada() {
             tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
-            cells.forEach(c => {
-                c.innerText = "";
-                c.removeAttribute('data-winner');
+            casas.forEach(casa => {
+                casa.innerText = "";
+                casa.removeAttribute('data-venceu');
             });
+            // O jogador O começa o próximo round equilibrando a partida
             meuTurno = (meuSimbolo === "O" && (vitoriasX + vitoriasO) % 2 !== 0) || (meuSimbolo === "X" && (vitoriasX + vitoriasO) % 2 === 0);
-            atualizarTurnoUI();
+            resgatarVez();
         }
 
         socket.on('player-disconnected', () => {
-            if (!modoBot) {
-                gameStatus.innerText = "Oponente desconectou! Vitória por W.O!";
-                setTimeout(() => location.reload(), 3000);
-            }
+            statusText.innerText = "Oponente desconectou. Você venceu por W.O!";
+            setTimeout(() => location.reload(), 4000);
         });
     </script>
 </body>

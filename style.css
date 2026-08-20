@@ -1,365 +1,142 @@
-:root {
-    --bg-main: #0a0812;
-    --card-bg: #130f26;
-    --card-border: #2d2250;
-    --neon-purple: #9d4edd;
-    --neon-pink: #ff2a85;
-    --neon-cyan: #00f0ff;
-    --neon-violet: #7b2cbf;
-    --text-main: #f1f1f6;
-    --text-muted: #9a95b0;
-    --success: #00ff88;
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Inter, -apple-system, Roboto, sans-serif;
-}
-
 body {
-    background-color: var(--bg-main);
-    background-image: 
-        radial-gradient(circle at 50% 0%, #2a184e 0%, transparent 60%),
-        radial-gradient(circle at 100% 100%, #15092b 0%, transparent 50%);
-    color: var(--text-main);
-    min-height: 100vh;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Header & Barra Topo */
-header {
-    width: 100%;
-    max-width: 1100px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(19, 15, 38, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.brand h1 {
-    font-size: 1.4rem;
-    color: var(--neon-cyan);
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.network-badge {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.8rem;
-    background: #0d091a;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--card-border);
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.ping-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--success);
-    box-shadow: 0 0 8px var(--success);
-}
-
-/* Layout Principal Grid */
-.main-layout {
-    width: 100%;
-    max-width: 1100px;
-    display: grid;
-    grid-template-columns: 340px 1fr;
-    gap: 20px;
-}
-
-/* Cards & Painéis */
-.card-panel {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    background-color: #121214;
+    color: #e1e1e6;
+    margin: 0;
     padding: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.section-title {
-    font-size: 0.88rem;
-    text-transform: uppercase;
-    color: var(--neon-purple);
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
+h1 {
+    color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
 }
 
-/* Formulários & Controls */
-.auth-box {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.avatar-preview-container {
-    position: relative;
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0;
-}
-
-.avatar-preview {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--neon-pink);
-    box-shadow: 0 0 12px rgba(255, 42, 133, 0.4);
-}
-
-.country-flag {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    font-size: 0.9rem;
-    background: rgba(0,0,0,0.8);
-    border-radius: 50%;
-    padding: 2px;
-}
-
-.input-field {
-    width: 100%;
-    padding: 10px 12px;
-    background: #090712;
-    border: 1px solid var(--card-border);
+/* Painel de Salas */
+.container-lobby {
+    max-width: 400px;
+    margin: 30px auto;
+    background: #202024;
+    padding: 20px;
     border-radius: 8px;
-    color: var(--text-main);
-    font-size: 0.85rem;
-    outline: none;
-    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-.input-field:focus {
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+input {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #29292e;
+    background: #121214;
+    color: white;
+    width: 70%;
+    margin-bottom: 15px;
 }
 
-select.input-field {
-    cursor: pointer;
-}
-
-select.input-field option {
-    background: var(--card-bg);
-    color: var(--text-main);
-}
-
-/* Botões */
-.btn-primary {
-    width: 100%;
-    padding: 10px 14px;
-    background: linear-gradient(135deg, var(--neon-purple), var(--neon-violet));
+button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
     border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 600;
+    background-color: #00ffcc;
+    color: #121214;
+    font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 0 12px rgba(157, 78, 221, 0.3);
+    transition: 0.2s;
 }
 
-.btn-primary:hover {
-    background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
-    box-shadow: 0 0 18px rgba(255, 42, 133, 0.5);
-    transform: translateY(-1px);
+button:hover {
+    background-color: #00ccaa;
+    box-shadow: 0 0 8px #00ffcc;
 }
 
-.btn-danger {
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #ff3366, #990026);
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 0 10px rgba(255, 51, 102, 0.3);
-    transition: all 0.2s;
+.btn-sair {
+    background-color: #ff3366;
+    color: white;
+    margin-top: 15px;
+}
+.btn-sair:hover {
+    background-color: #cc2252;
+    box-shadow: 0 0 8px #ff3366;
 }
 
-.btn-danger:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
-}
-
-/* Listas Roláveis */
-.scroll-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 180px;
+/* Lista de salas */
+.lista-salas {
+    margin-top: 15px;
+    text-align: left;
+    background: #121214;
+    padding: 10px;
+    border-radius: 5px;
+    max-height: 150px;
     overflow-y: auto;
-    padding-right: 4px;
 }
-
-.scroll-list::-webkit-scrollbar {
-    width: 4px;
-}
-
-.scroll-list::-webkit-scrollbar-thumb {
-    background: var(--card-border);
-    border-radius: 4px;
-}
-
-.player-item, .room-item {
+.item-sala {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: rgba(9, 7, 18, 0.6);
-    border: 1px solid #1e1738;
-    border-radius: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #29292e;
+}
+.item-sala button {
+    padding: 4px 10px;
     font-size: 0.85rem;
 }
 
-.player-info-mini {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.player-info-mini img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Área de Jogo Tabuleiro */
+/* Área do Jogo */
 #area-jogo {
     display: none;
-    flex-direction: column;
-    align-items: center;
+}
+
+.placar {
+    display: flex;
     justify-content: center;
-}
-
-.scoreboard {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(9, 7, 18, 0.8);
-    border-radius: 12px;
-    border: 1px solid var(--card-border);
-}
-
-.player-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
+    gap: 40px;
+    margin: 20px auto;
+    font-size: 1.2rem;
+    background: #202024;
+    max-width: 400px;
     padding: 10px;
     border-radius: 8px;
-    border: 2px solid transparent;
-    min-width: 110px;
-    transition: all 0.3s;
+}
+.player {
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+.player.ativo {
+    border: 2px solid #00ffcc;
+    background: rgba(0, 255, 204, 0.1);
 }
 
-.player-card.active {
-    border-color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.08);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+#status {
+    margin: 15px;
+    font-size: 1.1rem;
+    color: #ffcc00;
 }
 
-.game-board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    width: 100%;
-    max-width: 320px;
-    aspect-ratio: 1;
-    margin-bottom: 20px;
+/* Tabuleiro */
+.tabuleiro {
+    display: inline-grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
 }
-
-.cell {
-    background: #0d091a;
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
+.casa {
+    width: 100px;
+    height: 100px;
+    background-color: #29292e;
+    border-radius: 8px;
     font-size: 2.8rem;
     font-weight: bold;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     cursor: pointer;
-    transition: all 0.2s;
-    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
 }
-
-.cell:hover {
-    border-color: var(--neon-purple);
-    background: #150f2e;
+.casa:hover {
+    background-color: #323238;
 }
-
-.cell[data-winner="true"] {
-    background: var(--neon-purple) !important;
-    color: #fff !important;
-    box-shadow: 0 0 20px var(--neon-pink);
-    animation: pulse 1s infinite alternate;
-}
-
-@keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.03); }
-}
-
-#game-status {
-    font-size: 1.1rem;
-    color: #ffd166;
-    margin-bottom: 15px;
-    font-weight: 500;
-    text-align: center;
-}
-
-/* Responsividade Mobile */
-@media (max-width: 768px) {
-    .main-layout {
-        grid-template-columns: 1fr;
-    }
-
-    header {
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-start;
-    }
-
-    .network-badge {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .game-board {
-        max-width: 280px;
-    }
+.casa[data-venceu="true"] {
+    background-color: #00ffcc !important;
+    color: #121214;
 }

@@ -1,14 +1,13 @@
 {
-  "name": "servidor-jogo-da-velha-neon",
-  "version": "2.0.0",
-  "description": "Servidor multiplayer de Jogo da Velha com perfis personalizados e lobby neon",
+  "name": "servidor-jogo-da-velha",
+  "version": "1.0.0",
+  "description": "Servidor multiplayer para jogo da velha com salas",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.19.2",
-    "pg": "^8.11.5",
     "socket.io": "^4.7.5"
   }
 }
