@@ -3,388 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Velha Multiplayer Pro</title>
-    <style>
-        /* CSS Avançado - Tema Cyberpunk / Dark Matchmaking */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0c0c12;
-            color: #e1e1e6;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        /* Header de Identificação Global da Conta */
-        .header-perfil-game {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background-color: #14141d;
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 25px;
-            align-self: flex-start;
-        }
-
-        .header-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid #8257e5;
-            object-fit: cover;
-        }
-
-        .header-nome {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #fff;
-        }
-
-        .header-bits {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #00f0ff;
-            background: rgba(0, 240, 255, 0.1);
-            padding: 4px 10px;
-            border-radius: 12px;
-            margin-left: 5px;
-        }
-
-        h1 {
-            color: #fff;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin: 0 0 5px 0;
-            text-transform: uppercase;
-            font-size: 1.8rem;
-        }
-
-        /* Tela 1: Lobby e Matchmaking */
-        .container-lobby {
-            background-color: #14141d;
-            padding: 2rem;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.5);
-            margin-top: 15px;
-        }
-
-        .secao-criar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: #0c0c12;
-            color: #fff;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus {
-            border-color: #8257e5;
-        }
-
-        button {
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .btn-neon {
-            background-color: #8257e5;
-            color: white;
-            box-shadow: 0 4px 12px rgba(130, 87, 229, 0.3);
-        }
-
-        .btn-neon:hover {
-            background-color: #9466ff;
-            transform: translateY(-1px);
-        }
-
-        .sub-titulo-lobby {
-            text-align: left;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #00f0ff;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .lista-salas {
-            background-color: #0c0c12;
-            border-radius: 8px;
-            padding: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .item-sala {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-        .item-sala:last-child { border-bottom: none; }
-
-        .sala-info-bloco { display: flex; align-items: center; gap: 10px; text-align: left; }
-        .sala-dono-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #04d361; }
-        .sala-detalhes { display: flex; flex-direction: column; }
-        .sala-nome-txt { font-weight: bold; font-size: 0.9rem; color: #fff; }
-        .sala-vagas { font-size: 0.75rem; color: #7c7c8a; }
-
-        .item-sala button {
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            background-color: #1c1c24;
-            color: #00f0ff;
-            border: 1px solid rgba(0, 240, 255, 0.2);
-        }
-        .item-sala button:hover {
-            background-color: #00f0ff;
-            color: #0c0c12;
-        }
-
-        .no-salas {
-            font-size: 0.85rem;
-            color: #7c7c8a;
-            padding: 15px;
-            text-align: center;
-        }
-
-        /* Tela 2: Campo de Batalha (Invisível no início) */
-        .area-jogo {
-            display: none;
-            width: 100%;
-            max-width: 440px;
-            margin-top: 10px;
-        }
-
-        /* Painel de Exibição dos Versus e Avatares */
-        .painel-versus {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            background-color: #14141d;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .card-player {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            width: 40%;
-            padding: 8px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        /* Borda Neon dinâmica ativada via classe .ativo */
-        .card-player.p1-style.ativo { border-color: #00f0ff; box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
-        .card-player.p2-style.ativo { border-color: #ff007f; box-shadow: 0 0 15px rgba(255, 0, 127, 0.2); }
-
-        .player-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #0c0c12; }
-        .player-nome { font-size: 0.85rem; font-weight: 700; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
-        .player-score { font-size: 1.4rem; font-weight: 800; color: #fff; }
-
-        .centro-vs { font-weight: 800; font-size: 0.9rem; color: #7c7c8a; }
-
-        #status {
-            font-size: 1rem;
-            color: #04d361;
-            font-weight: 600;
-            margin-bottom: 20px;
-            min-height: 24px;
-            text-align: center;
-        }
-
-        /* Tabuleiro Grid Pro */
-        .tabuleiro {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 0 auto;
-            width: 320px;
-            height: 320px;
-        }
-
-        .casa {
-            background-color: #14141d;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 2.8rem;
-            font-weight: 900;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            color: #fff;
-        }
-        .casa:hover {
-            background-color: #1c1c24;
-            border-color: #8257e5;
-        }
-
-        /* Destaque para casas que ganharam a rodada */
-        .casa[data-venceu="true"] {
-            background-color: #04d361 !important;
-            color: #0c0c12 !important;
-            box-shadow: 0 0 20px rgba(4, 211, 97, 0.4);
-        }
-
-        .btn-abandonar {
-            background-color: transparent;
-            color: #ff4b4b;
-            font-size: 0.85rem;
-            text-decoration: underline;
-            margin-top: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            text-align: center;
-            border: none;
-            padding: 5px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-    </style>
+    <title>Neon Arcade Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="header-perfil-game">
-        <img id="headerAvatar" class="header-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Meu Avatar">
-        <span id="headerNome" class="header-nome">Carregando...</span>
-        <span id="headerBits" class="header-bits">⚡ 0</span>
+    <h1>Neon Tic-Tac-Toe 🕹️</h1>
+
+    <div class="server-stats">
+        <span><span class="stat-dot"></span> Online: <b id="count-online">0</b></span>
+        <span>|</span>
+        <span>🎮 Jogando: <b id="count-jogando">0</b></span>
     </div>
 
-    <h1>Jogo da Velha Online 🕹️</h1>
-
-    <div class="container-lobby" id="tela-lobby">
-        <div class="secao-criar">
-            <input type="text" id="input-sala" placeholder="Nome da nova sala..." maxlength="14">
-            <button class="btn-neon" id="btn-criar">Criar Sala</button>
-        </div>
-
-        <div class="sub-titulo-lobby">Salas Ativas Disponíveis</div>
-        <div class="lista-salas" id="lista-salas-container">
-            <div class="no-salas">Nenhuma matriz aberta. Inicie uma nova!</div>
-        </div>
-    </div>
-
-    <div class="area-jogo" id="area-jogo">
+    <div class="main-layout">
         
-        <div class="painel-versus">
-            <div class="card-player p1-style" id="p1-display">
-                <img id="p1-avatar" class="player-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P1">
-                <span id="p1-name" class="player-nome">Jogador 1</span>
-                <span id="score-x" class="player-score">0</span>
+        <div class="card-panel" id="tela-lobby">
+            
+            <h3>Seu Perfil</h3>
+            <div class="profile-preview">
+                <img id="avatar-preview" class="avatar-img" src="https://i.imgur.com/6VBx3io.png" alt="Avatar">
+                <div class="profile-inputs">
+                    <input type="text" id="input-nome" placeholder="Seu apelido..." value="Jogador">
+                    <input type="text" id="input-avatar-url" placeholder="URL da imagem/GIF...">
+                    <label class="file-input-label">
+                        📁 Carregar Arquivo
+                        <input type="file" id="input-avatar-file" accept="image/*" style="display: none;">
+                    </label>
+                </div>
             </div>
 
-            <div class="centro-vs">VS</div>
+            <hr style="border-color: var(--card-border); margin: 20px 0;">
 
-            <div class="card-player p2-style" id="p2-display">
-                <img id="p2-avatar" class="player-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="P2">
-                <span id="p2-name" class="player-nome">Aguardando...</span>
-                <span id="score-o" class="player-score">0</span>
+            <h3>Criar uma Sala</h3>
+            <input type="text" id="input-sala" class="sala-input" placeholder="Nome da sala...">
+            <button id="btn-criar">Criar / Entrar</button>
+
+            <h3>Salas Disponíveis</h3>
+            <div class="lista-salas" id="lista-salas-container">
+                <div style="color: #7c7c8a; text-align: center; padding: 10px;">Nenhuma sala ativa. Crie uma!</div>
             </div>
         </div>
 
-        <div id="status">Sincronizando dados de partida...</div>
+        <div class="card-panel" id="area-jogo">
+            <div class="placar">
+                <div class="player-card" id="p1-display">
+                    <img id="p1-img" class="player-avatar" src="https://i.imgur.com/6VBx3io.png">
+                    <span id="p1-nome">Player 1</span>
+                    <div>(X): <b id="score-x">0</b></div>
+                </div>
 
-        <div class="tabuleiro" id="tabuleiro">
-            <div class="casa" data-index="0"></div>
-            <div class="casa" data-index="1"></div>
-            <div class="casa" data-index="2"></div>
-            <div class="casa" data-index="3"></div>
-            <div class="casa" data-index="4"></div>
-            <div class="casa" data-index="5"></div>
-            <div class="casa" data-index="6"></div>
-            <div class="casa" data-index="7"></div>
-            <div class="casa" data-index="8"></div>
+                <div style="font-size: 1.5rem; font-weight: bold; color: var(--neon-pink);">VS</div>
+
+                <div class="player-card" id="p2-display">
+                    <img id="p2-img" class="player-avatar" src="https://i.imgur.com/6VBx3io.png">
+                    <span id="p2-nome">Aguardando...</span>
+                    <div>(O): <b id="score-o">0</b></div>
+                </div>
+            </div>
+
+            <div id="status">Conectando...</div>
+
+            <div class="tabuleiro" id="tabuleiro">
+                <div class="casa" data-index="0"></div>
+                <div class="casa" data-index="1"></div>
+                <div class="casa" data-index="2"></div>
+                <div class="casa" data-index="3"></div>
+                <div class="casa" data-index="4"></div>
+                <div class="casa" data-index="5"></div>
+                <div class="casa" data-index="6"></div>
+                <div class="casa" data-index="7"></div>
+                <div class="casa" data-index="8"></div>
+            </div>
+            <br>
+            <button class="btn-sair" id="btn-sair">Sair da Sala</button>
         </div>
 
-        <button class="btn-abandonar" id="btn-sair">Desistir e Sair da Sala</button>
     </div>
 
-    <!-- Módulos de Scripts Criptografados -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // ==========================================================
-        // CONTROLE INTEGRADO DA ECONOMIA DO CONTA.JS
-        // ==========================================================
-        const ContaSistema = {
-            STORAGE_KEY: 'meu_game_user_account',
-            dadosPadrao: {
-                nome: "Netrunner_Novo",
-                foto: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                bits: 0
-            },
-            carregar: function() {
-                try {
-                    const local = localStorage.getItem(this.STORAGE_KEY);
-                    if (local) {
-                        const parsed = JSON.parse(local);
-                        return {
-                            nome: parsed.nome || this.dadosPadrao.nome,
-                            foto: parsed.foto || this.dadosPadrao.foto,
-                            bits: parsed.bits !== undefined ? Number(parsed.bits) : this.dadosPadrao.bits
-                        };
-                    }
-                } catch(e) { console.warn("Erro ao carregar storage:", e); }
-                return { ...this.dadosPadrao };
-            },
-            modificarBits: function(qtd) {
-                const conta = this.carregar();
-                conta.bits = Math.max(0, conta.bits + qtd);
-                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(conta));
-                this.atualizarUI();
-                return conta.bits;
-            },
-            atualizarUI: function() {
-                const conta = this.carregar();
-                document.getElementById('headerAvatar').src = conta.foto;
-                document.getElementById('headerNome').textContent = conta.nome;
-                document.getElementById('headerBits').textContent = `⚡ ${conta.bits}`;
-            }
+        const socket = io(); // Conecta dinamicamente ao servidor atual no Render
+
+        // Dados de perfil e jogo
+        let perfilLocal = {
+            nome: localStorage.getItem('neon_nome') || "Jogador_" + Math.floor(Math.random() * 899 + 100),
+            avatar: localStorage.getItem('neon_avatar') || "https://i.imgur.com/6VBx3io.png"
         };
-
-        // Inicialização primária dos perfis locais
-        const perfilAtivo = ContaSistema.carregar();
-        window.addEventListener('DOMContentLoaded', () => ContaSistema.atualizarUI());
-
-        // ==========================================================
-        // MOTOR MULTIPLAYER DE COMBATE (APP.JS INTEGRADO)
-        // ==========================================================
-        const URL_SERVIDOR = "https://jogo-da-velha-t0jl.onrender.com"; 
-        const socket = io(URL_SERVIDOR);
 
         let minhaSala = "";
         let meuSimbolo = ""; 
@@ -392,65 +97,95 @@
         let vitoriasX = 0;
         let vitoriasO = 0;
         let tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
+        let oponentePerfil = { nome: "Oponente", avatar: "https://i.imgur.com/6VBx3io.png" };
 
+        // Elementos do DOM
+        const inputNome = document.getElementById('input-nome');
+        const inputAvatarUrl = document.getElementById('input-avatar-url');
+        const inputAvatarFile = document.getElementById('input-avatar-file');
+        const avatarPreview = document.getElementById('avatar-preview');
         const casas = document.querySelectorAll('.casa');
         const statusText = document.getElementById('status');
-        const lobbyArea = document.getElementById('tela-lobby');
+        const lobby = document.getElementById('tela-lobby');
         const jogoArea = document.getElementById('area-jogo');
-        const containerSalas = document.getElementById('lista-salas-container');
-        const FOTO_PADRAO = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
-        // Escuta e renderiza as salas livres na rede
+        // Inicializa entradas do Perfil
+        inputNome.value = perfilLocal.nome;
+        avatarPreview.src = perfilLocal.avatar;
+
+        function salvarEEnviarPerfil() {
+            localStorage.setItem('neon_nome', perfilLocal.nome);
+            localStorage.setItem('neon_avatar', perfilLocal.avatar);
+            socket.emit('atualizar-perfil', perfilLocal);
+        }
+
+        // Eventos do Perfil
+        inputNome.addEventListener('change', () => {
+            perfilLocal.nome = inputNome.value.trim() || "Jogador";
+            salvarEEnviarPerfil();
+        });
+
+        inputAvatarUrl.addEventListener('change', () => {
+            if (inputAvatarUrl.value.trim() !== "") {
+                perfilLocal.avatar = inputAvatarUrl.value.trim();
+                avatarPreview.src = perfilLocal.avatar;
+                salvarEEnviarPerfil();
+            }
+        });
+
+        inputAvatarFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    perfilLocal.avatar = evt.target.result;
+                    avatarPreview.src = perfilLocal.avatar;
+                    salvarEEnviarPerfil();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        socket.on('connect', () => {
+            salvarEEnviarPerfil();
+        });
+
+        // Atualização de Estatísticas Globais
+        socket.on('status-global', (dados) => {
+            document.getElementById('count-online').innerText = dados.online;
+            document.getElementById('count-jogando').innerText = dados.jogando;
+        });
+
+        // Receber salas ativas
         socket.on('lista-salas', (salas) => {
-            containerSalas.innerHTML = "";
-            if (!salas || salas.length === 0) {
-                containerSalas.innerHTML = '<div class="no-salas">Nenhuma matriz aberta. Inicie uma nova!</div>';
+            const container = document.getElementById('lista-salas-container');
+            container.innerHTML = "";
+            if (salas.length === 0) {
+                container.innerHTML = '<div style="color: #7c7c8a; text-align: center; padding: 10px;">Nenhuma sala ativa. Crie uma!</div>';
                 return;
             }
-            
             salas.forEach(sala => {
                 if (sala.jogadores < 2) {
-                    const fotoDono = sala.donoFoto || FOTO_PADRAO;
-                    const nomeDono = sala.donoNome || "User";
-                    
                     const item = document.createElement('div');
                     item.className = 'item-sala';
-                    item.innerHTML = `
-                        <div class="sala-info-bloco">
-                            <img class="sala-dono-avatar" src="${fotoDono}" alt="Dono">
-                            <div class="sala-detalhes">
-                                <span class="sala-nome-txt">${sala.nome}</span>
-                                <span class="sala-vagas">Criador: ${nomeDono}</span>
-                            </div>
-                        </div>
-                        <button onclick="entrarNaSala('${sala.nome}')">Conectar</button>
-                    `;
-                    containerSalas.appendChild(item);
+                    item.innerHTML = `<span><b>${sala.nome}</b> (${sala.jogadores}/2)</span>
+                                      <button onclick="entrarNaSala('${sala.nome}')">Entrar</button>`;
+                    container.appendChild(item);
                 }
             });
         });
 
-        // Evento do gatilho de criação
         document.getElementById('btn-criar').addEventListener('click', () => {
-            let nomeSala = document.getElementById('input-sala').value.trim();
-            if (!nomeSala) {
-                // Auto gerador se o jogador esquecer de digitar um nome
-                nomeSala = `GRID_${Math.floor(Math.random() * 899 + 100)}`;
-            }
-            entrarNaSala(nomeSala);
+            const nome = document.getElementById('input-sala').value.trim();
+            if (nome) entrarNaSala(nome);
         });
 
-        function entrarNaSala(nomeSala) {
-            minhaSala = nomeSala;
-            lobbyArea.style.display = "none";
+        function entrarNaSala(nome) {
+            minhaSala = nome;
+            lobby.style.display = "none";
             jogoArea.style.display = "block";
-            statusText.innerText = "Negociando chaves com o servidor...";
-
-            socket.emit('entrar-na-sala', {
-                sala: minhaSala,
-                jogadorNome: perfilAtivo.nome,
-                jogadorFoto: perfilAtivo.foto
-            });
+            statusText.innerText = "Entrando na sala...";
+            socket.emit('entrar-na-sala', { nomeSala: minhaSala });
         }
 
         document.getElementById('btn-sair').addEventListener('click', () => {
@@ -459,42 +194,49 @@
         });
 
         socket.on('player-assignment', (dados) => {
-            const simbolo = typeof dados === 'object' ? dados.simbolo : dados;
-            meuSimbolo = simbolo;
-
-            if (simbolo === "X") {
-                statusText.innerText = "Você é o Player 1 [X]. Aguardando oponente...";
-                document.getElementById('p1-name').innerText = perfilAtivo.nome;
-                document.getElementById('p1-avatar').src = perfilAtivo.foto;
+            meuSimbolo = dados.simbolo;
+            
+            if (meuSimbolo === "X") {
+                document.getElementById('p1-nome').innerText = perfilLocal.nome;
+                document.getElementById('p1-img').src = perfilLocal.avatar;
+                statusText.innerText = "Aguardando oponente...";
                 meuTurno = true;
             } else {
-                statusText.innerText = "Você é o Player 2 [O]. Sincronizando rodada...";
-                document.getElementById('p2-name').innerText = perfilAtivo.nome;
-                document.getElementById('p2-avatar').src = perfilAtivo.foto;
+                document.getElementById('p2-nome').innerText = perfilLocal.nome;
+                document.getElementById('p2-img').src = perfilLocal.avatar;
+                
+                // Pega dados do P1 que já estava na sala
+                const p1 = dados.jogadores.find(j => j.simbolo === "X");
+                if (p1) {
+                    document.getElementById('p1-nome').innerText = p1.nome;
+                    document.getElementById('p1-img').src = p1.avatar;
+                }
+                statusText.innerText = "Você entrou! Aguardando jogo iniciar...";
                 meuTurno = false;
             }
-            atualizarBrilhoBordaTurno();
         });
 
-        socket.on('room-info', (info) => {
-            if (!meuSimbolo || !info) return;
-
+        socket.on('oponente-entrou', (oponente) => {
             if (meuSimbolo === "X") {
-                if (info.p2) {
-                    document.getElementById('p2-name').innerText = info.p2.nome;
-                    document.getElementById('p2-avatar').src = info.p2.foto || FOTO_PADRAO;
-                }
-            } else if (meuSimbolo === "O") {
-                if (info.p1) {
-                    document.getElementById('p1-name').innerText = info.p1.nome;
-                    document.getElementById('p1-avatar').src = info.p1.foto || FOTO_PADRAO;
-                }
+                document.getElementById('p2-nome').innerText = oponente.nome;
+                document.getElementById('p2-img').src = oponente.avatar;
             }
-            atualizarBrilhoBordaTurno();
         });
 
-        socket.on('start-game', () => {
-            atualizarBrilhoBordaTurno();
+        socket.on('start-game', (dados) => {
+            const p1 = dados.jogadores.find(j => j.simbolo === "X");
+            const p2 = dados.jogadores.find(j => j.simbolo === "O");
+
+            if (p1) {
+                document.getElementById('p1-nome').innerText = p1.nome;
+                document.getElementById('p1-img').src = p1.avatar;
+            }
+            if (p2) {
+                document.getElementById('p2-nome').innerText = p2.nome;
+                document.getElementById('p2-img').src = p2.avatar;
+            }
+
+            resgatarVez();
         });
 
         casas.forEach(casa => {
@@ -502,63 +244,62 @@
                 const idx = casa.getAttribute('data-index');
                 if (!meuTurno || tabuleiroEstado[idx] !== "") return;
 
-                executarMovimentoLocal(idx, meuSimbolo);
+                fazerJogadaLocal(idx, meuSimbolo);
                 socket.emit('make-move', { sala: minhaSala, index: idx, simbolo: meuSimbolo });
             });
         });
 
         socket.on('move-made', (dados) => {
-            executarMovimentoLocal(dados.index, dados.simbolo);
+            fazerJogadaLocal(dados.index, dados.simbolo);
         });
 
-        function executarMovimentoLocal(index, simbolo) {
+        function fazerJogadaLocal(index, simbolo) {
             tabuleiroEstado[index] = simbolo;
-            if(casas[index]) casas[index].innerText = simbolo;
+            casas[index].innerText = simbolo;
+            casas[index].style.color = simbolo === "X" ? "var(--neon-cyan)" : "var(--neon-pink)";
             meuTurno = (simbolo !== meuSimbolo);
             
-            if (!checarGanhadores()) {
-                atualizarBrilhoBordaTurno();
+            if (!checarResultado()) {
+                resgatarVez();
             }
         }
 
-        function atualizarBrilhoBordaTurno() {
-            const vezDoP1 = (meuTurno && meuSimbolo === "X") || (!meuTurno && meuSimbolo === "O");
-            statusText.innerText = vezDoP1 ? "Sua vez de jogar!" : "Aguardando ação do oponente...";
-            
-            document.getElementById('p1-display').classList.toggle('ativo', vezDoP1);
-            document.getElementById('p2-display').classList.toggle('ativo', !vezDoP1);
+        function resgatarVez() {
+            statusText.innerText = meuTurno ? "Sua vez de jogar!" : "Vez do oponente...";
+            document.getElementById('p1-display').classList.toggle('ativo', (meuTurno && meuSimbolo === "X") || (!meuTurno && meuSimbolo === "O"));
+            document.getElementById('p2-display').classList.toggle('ativo', (meuTurno && meuSimbolo === "O") || (!meuTurno && meuSimbolo === "X"));
         }
 
-        function checarGanhadores() {
-            const caminhosvenceu = [
+        function checarResultado() {
+            const caminhosVitoria = [
                 [0,1,2], [3,4,5], [6,7,8],
                 [0,3,6], [1,4,7], [2,5,8],
                 [0,4,8], [2,4,6]
             ];
 
-            for (const item of caminhosvenceu) {
-                const [a, b, c] = item;
+            for (const caminho of caminhosVitoria) {
+                const [a, b, c] = caminho;
                 if (tabuleiroEstado[a] && tabuleiroEstado[a] === tabuleiroEstado[b] && tabuleiroEstado[a] === tabuleiroEstado[c]) {
-                    finalizarSessaoRodada(tabuleiroEstado[a], item);
+                    finalizarRodada(tabuleiroEstado[a], caminho);
                     return true;
                 }
             }
 
             if (!tabuleiroEstado.includes("")) {
-                finalizarSessaoRodada("Empate");
+                finalizarRodada("Empate");
                 return true;
             }
             return false;
         }
 
-        function finalizarSessaoRodada(vencedor, comboAlinhado = null) {
+        function finalizarRodada(vencedor, caminhoGanhador = null) {
             meuTurno = false;
             
             if (vencedor === "Empate") {
-                statusText.innerText = "Empate Técnico na Matrix!";
+                statusText.innerText = "A rodada empatou! Reiniciando...";
             } else {
-                if (comboAlinhado) {
-                    comboAlinhado.forEach(i => { if(casas[i]) casas[i].setAttribute('data-venceu', 'true'); });
+                if (caminhoGanhador) {
+                    caminhoGanhador.forEach(i => casas[i].setAttribute('data-venceu', 'true'));
                 }
                 if (vencedor === "X") vitoriasX++;
                 if (vencedor === "O") vitoriasO++;
@@ -566,40 +307,33 @@
                 document.getElementById('score-x').innerText = vitoriasX;
                 document.getElementById('score-o').innerText = vitoriasO;
 
-                statusText.innerText = vencedor === meuSimbolo ? "Você venceu a rodada!" : "O oponente quebrou seu sinal!";
+                statusText.innerText = vencedor === meuSimbolo ? "🏆 Você venceu esta rodada!" : "❌ Oponente venceu a rodada!";
             }
 
             setTimeout(() => {
                 if (vitoriasX === 3 || vitoriasO === 3) {
-                    const finalista = vitoriasX === 3 ? "X" : "O";
-                    if (meuSimbolo === finalista) {
-                        ContaSistema.modificarBits(50);
-                        alert("🏆 VITÓRIA DO SISTEMA! Você faturou +50 Bits!");
-                    } else {
-                        ContaSistema.modificarBits(5);
-                        alert("💀 CONEXÃO PERDIDA: Oponente fechou a melhor de 3. +5 Bits.");
-                    }
+                    const campeao = vitoriasX === 3 ? "Player 1 (X)" : "Player 2 (O)";
+                    alert(`🏆 FIM DE JOGO! O grande campeão foi ${campeao}!`);
                     location.reload();
                 } else {
-                    reiniciarGradeRodada();
+                    proximaRodada();
                 }
-            }, 2500);
+            }, 3000);
         }
 
-        function reiniciarGradeRodada() {
+        function proximaRodada() {
             tabuleiroEstado = ["", "", "", "", "", "", "", "", ""];
             casas.forEach(casa => {
                 casa.innerText = "";
                 casa.removeAttribute('data-venceu');
             });
             meuTurno = (meuSimbolo === "O" && (vitoriasX + vitoriasO) % 2 !== 0) || (meuSimbolo === "X" && (vitoriasX + vitoriasO) % 2 === 0);
-            atualizarBrilhoBordaTurno();
+            resgatarVez();
         }
 
         socket.on('player-disconnected', () => {
-            statusText.innerText = "Oponente desconectou da rede! Ganhador por W.O.";
-            ContaSistema.modificarBits(25);
-            setTimeout(() => location.reload(), 3000);
+            statusText.innerText = "Oponente desconectou! Você venceu por W.O!";
+            setTimeout(() => location.reload(), 3500);
         });
     </script>
 </body>

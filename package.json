@@ -1,7 +1,7 @@
 {
-  "name": "servidor-jogo-da-velha",
-  "version": "1.0.0",
-  "description": "Servidor multiplayer para jogo da velha",
+  "name": "servidor-jogo-da-velha-neon",
+  "version": "2.0.0",
+  "description": "Servidor multiplayer de Jogo da Velha com perfis personalizados e lobby neon",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
